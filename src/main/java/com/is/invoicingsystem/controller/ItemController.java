@@ -3,12 +3,13 @@ package com.is.invoicingsystem.controller;
 import com.is.invoicingsystem.dao.ItemDao;
 import com.is.invoicingsystem.model.Item;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 
@@ -41,7 +42,7 @@ public class ItemController extends HttpServlet {
         }
 
         switch (action) {
-            case "add":
+            case "insert":
                 addItem(request, response);
                 break;
             case "edit":
@@ -59,11 +60,15 @@ public class ItemController extends HttpServlet {
     private void addItem(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter("name");
         String description = request.getParameter("description");
+        Long qty = Long.parseLong(request.getParameter("quantity"));
         double price = Double.parseDouble(request.getParameter("price"));
+
+        System.out.println("name = " + name + " description = " + description + " qty = " + qty + " price = " + price);
 
         Item item = new Item();
         item.setName(name);
         item.setDescription(description);
+        item.setQuantity(qty);
         item.setPrice(BigDecimal.valueOf(price));
 
         itemDao.saveItem(item);

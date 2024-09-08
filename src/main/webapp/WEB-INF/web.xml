@@ -23,7 +23,7 @@
 
     <servlet-mapping>
         <servlet-name>ItemController</servlet-name>
-        <url-pattern>/items</url-pattern>
+        <url-pattern>/pages/items</url-pattern>
     </servlet-mapping>
 
     <servlet>
@@ -33,7 +33,7 @@
 
     <servlet-mapping>
         <servlet-name>InvoiceController</servlet-name>
-        <url-pattern>/invoices</url-pattern>
+        <url-pattern>/pages/invoices</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
