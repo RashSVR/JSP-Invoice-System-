@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Item</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Add New Item</h1>
+    <form id="addItemForm">
+        <div class="mb-3">
+            <label for="itemName" class="form-label">Item Name</label>
+            <input type="text" class="form-control" id="itemName" placeholder="Enter item name" required>
+        </div>
+        <div class="mb-3">
+            <label for="itemDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="itemDescription" rows="3" placeholder="Enter item description"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="itemPrice" class="form-label">Price</label>
+            <input type="number" step="0.01" class="form-control" id="itemPrice" placeholder="Enter item price" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Item</button>
+        <a href="items.html" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    // Handle form submission
+    $('#addItemForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const newItem = {
+            name: $('#itemName').val(),
+            description: $('#itemDescription').val(),
+            price: $('#itemPrice').val()
+        };
+
+        // AJAX call to add the item to the database
+        $.ajax({
+            url: '/api/items', // Your backend endpoint for adding items
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(newItem),
+            success: function(response) {
+                alert('Item added successfully.');
+                window.location.href = 'items.html'; // Redirect to items list or any other page
+            },
+            error: function() {
+                alert('Failed to add item. Please try again.');
+            }
+        });
+    });
+</script>
+</body>
+</html>
