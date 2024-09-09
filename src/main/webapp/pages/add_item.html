@@ -47,7 +47,7 @@
 
         // AJAX call to add the item to the database
         $.ajax({
-            url: 'http://localhost:8080/InvoicingSystem-1.0-SNAPSHOT/items', // Your backend endpoint for adding items
+            url: '../items', // Your backend endpoint for adding items
             method: 'POST',
             data: $.param(newItem) + '&action=insert', // Include the action parameter
             success: function(response) {
