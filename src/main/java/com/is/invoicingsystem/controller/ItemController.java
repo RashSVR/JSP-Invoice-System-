@@ -1,36 +1,44 @@
 package com.is.invoicingsystem.controller;
 
+import com.google.gson.Gson;
 import com.is.invoicingsystem.dao.ItemDao;
 import com.is.invoicingsystem.model.Item;
-
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 
 @WebServlet("/items")
 public class ItemController extends HttpServlet {
     private ItemDao itemDao;
+    private Gson gson = new Gson();
 
     public void init() {
         itemDao = new ItemDao();
     }
 
-    // Handle displaying the list of items
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("items", itemDao.getAllItems());
-        RequestDispatcher dispatcher = request.getRequestDispatcher("pages/items.jsp");
-        dispatcher.forward(request, response);
+        String action = request.getParameter("action");
+
+        if ("get".equals(action)) {
+            // Return item details as JSON for edit
+            int id = Integer.parseInt(request.getParameter("id"));
+            Item item = itemDao.getItemById(id);
+            String itemJson = gson.toJson(item);
+
+            response.setContentType("application/json");
+            response.getWriter().write(itemJson);
+        } else {
+            // Display items page
+            request.setAttribute("items", itemDao.getAllItems());
+            request.getRequestDispatcher("pages/items.jsp").forward(request, response);
+        }
     }
 
-    // Handle adding, editing, and deleting items
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -58,42 +66,58 @@ public class ItemController extends HttpServlet {
     }
 
     private void addItem(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String name = request.getParameter("name");
-        String description = request.getParameter("description");
-        Long qty = Long.parseLong(request.getParameter("quantity"));
-        double price = Double.parseDouble(request.getParameter("price"));
+        try {
+            Item item = getItemFromRequest(request);
+            itemDao.saveItem(item);
 
-        System.out.println("name = " + name + " description = " + description + " qty = " + qty + " price = " + price);
-
-        Item item = new Item();
-        item.setName(name);
-        item.setDescription(description);
-        item.setQuantity(qty);
-        item.setPrice(BigDecimal.valueOf(price));
-
-        itemDao.saveItem(item);
-        response.sendRedirect("items");
+            // Return the saved item as JSON
+            String itemJson = gson.toJson(item);
+            response.setContentType("application/json");
+            response.getWriter().write(itemJson);
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Failed to save item.");
+        }
     }
 
     private void editItem(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
+        try {
+            Item item = getItemFromRequest(request);
+            itemDao.updateItem(item);
+
+            // Return the updated item as JSON
+            String itemJson = gson.toJson(item);
+            response.setContentType("application/json");
+            response.getWriter().write(itemJson);
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Failed to update item.");
+        }
+    }
+
+    private void deleteItem(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            itemDao.deleteItem(id);
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Failed to delete item.");
+        }
+    }
+
+    private Item getItemFromRequest(HttpServletRequest request) {
+        String idStr = request.getParameter("id");
+        Integer id = idStr != null && !idStr.isEmpty() ? Integer.parseInt(idStr) : null;
         String name = request.getParameter("name");
         String description = request.getParameter("description");
-        double price = Double.parseDouble(request.getParameter("price"));
+        Long quantity = Long.parseLong(request.getParameter("quantity"));
+        BigDecimal price = new BigDecimal(request.getParameter("price"));
 
         Item item = new Item();
         item.setId(id);
         item.setName(name);
         item.setDescription(description);
-        item.setPrice(BigDecimal.valueOf(price));
+        item.setQuantity(quantity);
+        item.setPrice(price);
 
-        itemDao.saveItem(item);
-        response.sendRedirect("items");
-    }
-
-    private void deleteItem(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        itemDao.deleteItem(id);
-        response.sendRedirect("items");
+        return item;
     }
 }

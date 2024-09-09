@@ -12,6 +12,9 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Manage Invoices</h1>
 
+    <!-- Alert Div for Messages -->
+    <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
+
     <!-- Button to Open the Add Invoice Modal -->
     <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#addInvoiceModal">
         Add New Invoice
@@ -27,25 +30,19 @@
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Customer Name</th>
-                    <th>Invoice Date</th>
-                    <th>Total Amount</th>
-                    <th>Status</th>
-                    <th>Items</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Total</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="invoiceTableBody">
-                <c:forEach var="invoice" items="${listInvoices}">
+                <c:forEach var="invoice" items="${invoices}">
                     <tr id="invoice-${invoice.id}">
                         <td>${invoice.id}</td>
-                        <td>${invoice.customerName}</td>
-                        <td>${invoice.invoiceDate}</td>
-                        <td>${invoice.totalAmount}</td>
-                        <td>${invoice.status}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#invoiceItemsModal" onclick="showInvoiceItems(${invoice.id})">View Items</button>
-                        </td>
+                        <td>${invoice.date}</td>
+                        <td>${invoice.customer}</td>
+                        <td>${invoice.total}</td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="editInvoice(${invoice.id})">Edit</button>
                             <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${invoice.id})">Delete</button>
@@ -63,7 +60,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addInvoiceModalLabel">Add New Invoice</h5>
+                <h5 class="modal-title" id="addInvoiceModalLabel">Add/Edit Invoice</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -72,89 +69,18 @@
                 <form id="invoiceForm">
                     <input type="hidden" id="invoiceId">
                     <div class="form-group">
-                        <label for="customerName">Customer Name</label>
-                        <input type="text" class="form-control" id="customerName" required>
+                        <label for="date">Date</label>
+                        <input type="date" class="form-control" id="date" required>
                     </div>
                     <div class="form-group">
-                        <label for="invoiceDate">Invoice Date</label>
-                        <input type="date" class="form-control" id="invoiceDate" required>
+                        <label for="customer">Customer</label>
+                        <input type="text" class="form-control" id="customer">
                     </div>
                     <div class="form-group">
-                        <label for="totalAmount">Total Amount</label>
-                        <input type="number" step="0.01" class="form-control" id="totalAmount" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select class="form-control" id="status" required>
-                            <option value="Paid">Paid</option>
-                            <option value="Unpaid">Unpaid</option>
-                            <option value="Pending">Pending</option>
-                        </select>
+                        <label for="total">Total</label>
+                        <input type="number" step="0.01" class="form-control" id="total" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Save Invoice</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Invoice Items Modal -->
-<div class="modal fade" id="invoiceItemsModal" tabindex="-1" aria-labelledby="invoiceItemsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="invoiceItemsModalLabel">Invoice Items</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Description</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                    </tr>
-                    </thead>
-                    <tbody id="invoiceItemsTableBody">
-                    <!-- Items will be dynamically inserted here -->
-                    </tbody>
-                </table>
-                <button class="btn btn-success" data-toggle="modal" data-target="#addItemToInvoiceModal">Add New Item</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add New Item to Invoice Modal -->
-<div class="modal fade" id="addItemToInvoiceModal" tabindex="-1" aria-labelledby="addItemToInvoiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addItemToInvoiceModalLabel">Add New Item to Invoice</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addItemForm">
-                    <input type="hidden" id="invoiceIdForItem">
-                    <div class="form-group">
-                        <label for="itemDescription">Description</label>
-                        <input type="text" class="form-control" id="itemDescription" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="itemQuantity">Quantity</label>
-                        <input type="number" class="form-control" id="itemQuantity" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="itemPrice">Price</label>
-                        <input type="number" step="0.01" class="form-control" id="itemPrice" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Item</button>
                 </form>
             </div>
         </div>
@@ -170,75 +96,94 @@
     // Add or Edit Invoice
     $('#invoiceForm').on('submit', function(e) {
         e.preventDefault();
-        let id = $('#invoiceId').val();
-        let url = id ? 'invoices?action=update' : 'invoices?action=insert';
 
-        $.post(url, {
-            id: id,
-            customerName: $('#customerName').val(),
-            invoiceDate: $('#invoiceDate').val(),
-            totalAmount: $('#totalAmount').val(),
-            status: $('#status').val()
-        }, function(data) {
-            location.reload();
+        let id = $('#invoiceId').val();
+        let url = id ? 'invoices?action=edit' : 'invoices?action=insert';
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: $('#invoiceForm').serialize(),
+            dataType: 'json',
+            beforeSend: function() {
+                $('#alertDiv').removeClass('alert-success alert-danger').addClass('alert-info').text('Processing...').show();
+            },
+            success: function(data) {
+                $('#alertDiv').removeClass('alert-danger alert-info').addClass('alert-success').text('Invoice saved successfully!').show();
+                $('#addInvoiceModal').modal('hide');
+
+                if (id) {
+                    $('#invoice-' + id).html(`
+                        <td>${data.id}</td>
+                        <td>${data.date}</td>
+                        <td>${data.customer}</td>
+                        <td>${data.total}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="editInvoice(${data.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${data.id})">Delete</button>
+                        </td>
+                    `);
+                } else {
+                    $('#invoiceTableBody').append(`
+                        <tr id="invoice-${data.id}">
+                            <td>${data.id}</td>
+                            <td>${data.date}</td>
+                            <td>${data.customer}</td>
+                            <td>${data.total}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="editInvoice(${data.id})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteInvoice(${data.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                }
+
+                $('#invoiceForm')[0].reset();
+                $('#invoiceId').val('');
+            },
+            error: function(xhr, status, error) {
+                $('#alertDiv').removeClass('alert-success alert-info').addClass('alert-danger').text('Failed to save invoice.').show();
+            }
         });
     });
 
     // Edit Invoice
     function editInvoice(id) {
-        $.get('invoices?action=edit&id=' + id, function(data) {
-            let invoice = data.invoice;
-            $('#invoiceId').val(invoice.id);
-            $('#customerName').val(invoice.customerName);
-            $('#invoiceDate').val(invoice.invoiceDate);
-            $('#totalAmount').val(invoice.totalAmount);
-            $('#status').val(invoice.status);
-            $('#addInvoiceModal').modal('show');
+        $.ajax({
+            type: 'GET',
+            url: 'invoices?action=edit&id=' + id,
+            dataType: 'json',
+            success: function(data) {
+                $('#invoiceId').val(data.id);
+                $('#date').val(data.date);
+                $('#customer').val(data.customer);
+                $('#total').val(data.total);
+                $('#addInvoiceModalLabel').text('Edit Invoice');
+                $('#addInvoiceModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching invoice:", error);
+            }
         });
     }
 
     // Delete Invoice
     function deleteInvoice(id) {
         if (confirm('Are you sure you want to delete this invoice?')) {
-            $.post('invoices?action=delete', { id: id }, function(data) {
-                location.reload();
+            $.ajax({
+                type: 'POST',
+                url: 'invoices?action=delete',
+                data: { id: id },
+                success: function(data) {
+                    $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoice deleted successfully!').show();
+                    $('#invoice-' + id).remove();
+                },
+                error: function(xhr, status, error) {
+                    $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to delete invoice.').show();
+                }
             });
         }
     }
-
-    // Show Invoice Items
-    function showInvoiceItems(invoiceId) {
-        $.get('invoices?action=viewItems&invoiceId=' + invoiceId, function(data) {
-            $('#invoiceItemsTableBody').html(data);
-            $('#invoiceItemsModal').modal('show');
-        });
-    }
-
-    // Add New Item to Invoice
-    $('#addItemForm').on('submit', function(e) {
-        e.preventDefault();
-
-        $.post('items?action=addToInvoice', {
-            invoiceId: $('#invoiceIdForItem').val(),
-            description: $('#itemDescription').val(),
-            quantity: $('#itemQuantity').val(),
-            price: $('#itemPrice').val()
-        }, function(response) {
-            if (response.success) {
-                $('#addItemToInvoiceModal').modal('hide');
-                showInvoiceItems($('#invoiceIdForItem').val());
-            } else {
-                alert('Failed to add item. Please try again.');
-            }
-        });
-    });
-
-    // Set invoice ID when showing the Add Item modal
-    $('#addItemToInvoiceModal').on('show.bs.modal', function(event) {
-        let button = $(event.relatedTarget);
-        let invoiceId = button.data('invoice-id');
-        $('#invoiceIdForItem').val(invoiceId);
-    });
 </script>
 </body>
 </html>

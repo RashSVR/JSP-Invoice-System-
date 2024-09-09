@@ -14,19 +14,33 @@ public class ItemDao {
         }
     }
 
+    public Item getItemById(int id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.get(Item.class, id);
+        }
+    }
+
     public void saveItem(Item item) {
-        System.out.println("item = "+item);
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            session.saveOrUpdate(item);
+            session.save(item);
             transaction.commit();
         } catch (Exception e) {
-            e.printStackTrace();
-            if (transaction != null) {
-//                transaction.rollback();
-            }
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
+    }
 
+    public void updateItem(Item item) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            session.update(item);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 
@@ -37,8 +51,11 @@ public class ItemDao {
             Item item = session.get(Item.class, id);
             if (item != null) {
                 session.delete(item);
-                transaction.commit();
             }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
         }
     }
 }
