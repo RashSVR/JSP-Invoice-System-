@@ -34,29 +34,19 @@
                 </tr>
                 </thead>
                 <tbody id="itemTableBody">
-                <!-- Example data - Replace with backend integration (JSP/Servlet or AJAX) -->
-                <tr id="item-1">
-                    <td>1</td>
-                    <td>Sample Item 1</td>
-                    <td>Sample description 1</td>
-                    <td>10</td>
-                    <td>100.00</td>
-                    <td>
-                        <a href="edit_item.html?id=1" class="btn btn-primary btn-sm">Edit</a>
-                        <button class="btn btn-danger btn-sm" onclick="confirmDelete(1)">Delete</button>
-                    </td>
-                </tr>
-                <tr id="item-2">
-                    <td>2</td>
-                    <td>Sample Item 2</td>
-                    <td>Sample description 2</td>
-                    <td>5</td>
-                    <td>50.00</td>
-                    <td>
-                        <a href="edit_item.html?id=2" class="btn btn-primary btn-sm">Edit</a>
-                        <button class="btn btn-danger btn-sm" onclick="confirmDelete(2)">Delete</button>
-                    </td>
-                </tr>
+                <c:forEach var="item" items="${items}">
+                    <tr id="item-${item.id}">
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.description}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.price}</td>
+                        <td>
+                            <a href="edit_item.html?id=${item.id}" class="btn btn-primary btn-sm">Edit</a>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDelete(${item.id})">Delete</button>
+                        </td>
+                    </tr>
+                </c:forEach>
                 </tbody>
             </table>
         </div>
@@ -95,8 +85,7 @@
     // Function to confirm deletion of an item
     function confirmDelete(id) {
         deleteItemId = id;
-        console.log("Preparing to delete item with ID:", id); // Debugging log
-        $('#deleteConfirmationModal').modal('show');  // Show the delete confirmation modal
+        $('#deleteConfirmationModal').modal('show');
     }
 
     // Handle deletion confirmation
@@ -106,22 +95,14 @@
             type: 'POST',
             data: {action: 'delete', id: deleteItemId},
             success: function () {
-                // Remove the item row from the table
                 $(`#item-${deleteItemId}`).remove();
-
-                // Show success message
                 $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item deleted successfully').show();
                 setTimeout(() => $('#alertDiv').hide(), 3000);
-
-                // Close the modal
                 $('#deleteConfirmationModal').modal('hide');
             },
             error: function () {
-                // Show error message
                 $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to delete item').show();
                 setTimeout(() => $('#alertDiv').hide(), 3000);
-
-                // Close the modal
                 $('#deleteConfirmationModal').modal('hide');
             }
         });
