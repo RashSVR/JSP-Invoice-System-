@@ -22,6 +22,10 @@
             <textarea class="form-control" id="itemDescription" rows="3" placeholder="Enter item description"></textarea>
         </div>
         <div class="form-group">
+            <label for="itemQuantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="itemQuantity" placeholder="Enter item quantity" required>
+        </div>
+        <div class="form-group">
             <label for="itemPrice" class="form-label">Price</label>
             <input type="number" step="0.01" class="form-control" id="itemPrice" placeholder="Enter item price" required>
         </div>
@@ -37,6 +41,7 @@
         const newItem = {
             name: $('#itemName').val(),
             description: $('#itemDescription').val(),
+            quantity: $('#itemQuantity').val(),
             price: $('#itemPrice').val()
         };
 
