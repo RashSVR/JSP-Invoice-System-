@@ -9,7 +9,9 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @WebServlet(name = "items", value = "/items")
 public class ItemController extends HttpServlet {
@@ -21,13 +23,15 @@ public class ItemController extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 //        String action = request.getParameter("action");
-        List<Item> items;
-        Long id = Long.parseLong(request.getParameter("id"));
+        List<Item> items = new ArrayList<>();
+        Long id = Long.parseLong(Objects.nonNull(request.getParameter("id")) ? request.getParameter("id") : "0");
         if (id != 0) {
-            items = List.of(itemDao.getItemById(id));
+            Item item = itemDao.getItemById(id);
+            if (Objects.nonNull(item)) {
+                items.add(item);
+            }
         } else {
             items = itemDao.getAllItems();
         }
@@ -35,26 +39,10 @@ public class ItemController extends HttpServlet {
         String itemJson = gson.toJson(items);
         response.setContentType("application/json");
         response.getWriter().print(itemJson);
-
-//        request.setAttribute("items", items);
-//        request.getRequestDispatcher("pages/items.jsp").forward(request, response);
-//        if ("get".equals(action)) {
-//            // Return item details as JSON for edit
-//            int id = Integer.parseInt(request.getParameter("id"));
-//            Item item = itemDao.getItemById(id);
-//            String itemJson = gson.toJson(item);
-//
-//            response.setContentType("application/json");
-//            response.getWriter().write(itemJson);
-//        } else {
-//            // Display items page
-//
-//        }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
 
         if (action == null) {
