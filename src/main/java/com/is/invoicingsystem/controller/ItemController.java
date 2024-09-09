@@ -6,11 +6,12 @@ import com.is.invoicingsystem.model.Item;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.math.BigDecimal;
 
-@WebServlet("/items")
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+
+@WebServlet(name = "items", value = "/items")
 public class ItemController extends HttpServlet {
     private ItemDao itemDao;
     private Gson gson = new Gson();
@@ -22,21 +23,33 @@ public class ItemController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-
-        if ("get".equals(action)) {
-            // Return item details as JSON for edit
-            int id = Integer.parseInt(request.getParameter("id"));
-            Item item = itemDao.getItemById(id);
-            String itemJson = gson.toJson(item);
-
-            response.setContentType("application/json");
-            response.getWriter().write(itemJson);
+//        String action = request.getParameter("action");
+        List<Item> items;
+        Long id = Long.parseLong(request.getParameter("id"));
+        if (id != 0) {
+            items = List.of(itemDao.getItemById(id));
         } else {
-            // Display items page
-            request.setAttribute("items", itemDao.getAllItems());
-            request.getRequestDispatcher("pages/items.jsp").forward(request, response);
+            items = itemDao.getAllItems();
         }
+        System.out.println("items = " + items);
+        String itemJson = gson.toJson(items);
+        response.setContentType("application/json");
+        response.getWriter().print(itemJson);
+
+//        request.setAttribute("items", items);
+//        request.getRequestDispatcher("pages/items.jsp").forward(request, response);
+//        if ("get".equals(action)) {
+//            // Return item details as JSON for edit
+//            int id = Integer.parseInt(request.getParameter("id"));
+//            Item item = itemDao.getItemById(id);
+//            String itemJson = gson.toJson(item);
+//
+//            response.setContentType("application/json");
+//            response.getWriter().write(itemJson);
+//        } else {
+//            // Display items page
+//
+//        }
     }
 
     @Override
@@ -95,7 +108,7 @@ public class ItemController extends HttpServlet {
 
     private void deleteItem(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            int id = Integer.parseInt(request.getParameter("id"));
+            Long id = Long.parseLong(request.getParameter("id"));
             itemDao.deleteItem(id);
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
@@ -105,7 +118,7 @@ public class ItemController extends HttpServlet {
 
     private Item getItemFromRequest(HttpServletRequest request) {
         String idStr = request.getParameter("id");
-        Integer id = idStr != null && !idStr.isEmpty() ? Integer.parseInt(idStr) : null;
+        Long id = idStr != null && !idStr.isEmpty() ? Long.parseLong(idStr) : null;
         String name = request.getParameter("name");
         String description = request.getParameter("description");
         Long quantity = Long.parseLong(request.getParameter("quantity"));

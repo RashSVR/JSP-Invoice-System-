@@ -2,8 +2,8 @@ package com.is.invoicingsystem.controller;
 
 import com.is.invoicingsystem.dao.InvoiceDao;
 import com.is.invoicingsystem.dao.ItemDao;
-import com.is.invoicingsystem.model.Invoice;
 
+import com.is.invoicingsystem.model.Invoice;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -67,10 +67,10 @@ public class InvoiceController extends HttpServlet {
 
         // Convert java.util.Date to java.time.LocalDate
         Date date = new Date(); // current date
-        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
         Invoice invoice = new Invoice();
-        invoice.setDate(localDate); // Set LocalDate
+        invoice.setDate(new Date()); // Set LocalDate
         invoice.setTotal(BigDecimal.valueOf(total));
 
         invoiceDao.saveInvoice(invoice);
@@ -78,16 +78,13 @@ public class InvoiceController extends HttpServlet {
     }
 
     private void editInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
+        Long id = Long.parseLong(request.getParameter("id"));
         double total = Double.parseDouble(request.getParameter("total"));
 
-        // Convert java.util.Date to java.time.LocalDate
-        Date date = new Date(); // current date
-        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
         Invoice invoice = new Invoice();
         invoice.setId(id);
-        invoice.setDate(localDate); // Set LocalDate
+        invoice.setDate(new Date()); // Set LocalDate
         invoice.setTotal(BigDecimal.valueOf(total));
 
         invoiceDao.saveInvoice(invoice);
@@ -95,7 +92,7 @@ public class InvoiceController extends HttpServlet {
     }
 
     private void deleteInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
+        Long id = Long.parseLong(request.getParameter("id"));
         invoiceDao.deleteInvoice(id);
         response.sendRedirect("invoices");
     }

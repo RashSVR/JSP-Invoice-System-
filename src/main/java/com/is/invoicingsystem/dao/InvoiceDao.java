@@ -28,7 +28,7 @@ public class InvoiceDao {
         }
     }
 
-    public void deleteInvoice(int id) {
+    public void deleteInvoice(Long id) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();

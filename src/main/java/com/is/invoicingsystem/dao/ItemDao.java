@@ -14,7 +14,7 @@ public class ItemDao {
         }
     }
 
-    public Item getItemById(int id) {
+    public Item getItemById(Long id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.get(Item.class, id);
         }
@@ -44,7 +44,7 @@ public class ItemDao {
         }
     }
 
-    public void deleteItem(int id) {
+    public void deleteItem(Long id) {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
