@@ -28,7 +28,7 @@
         <a href="items.html" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
 <script>
     const queryParams = new URLSearchParams(window.location.search);
     const itemId = queryParams.get('id');  // Get item ID from the URL
@@ -36,7 +36,7 @@
     // Function to load the item details based on the item ID
     function loadItem() {
         $.ajax({
-            url: `/api/items/${itemId}`, // Backend endpoint to fetch the item details
+            url: `../items?id=${itemId}`, // Backend endpoint to fetch the item details with ID as a query parameter
             method: 'GET',
             success: function (data) {
                 $('#itemName').val(data.name);
@@ -62,7 +62,7 @@
 
         // AJAX call to update the item in the database
         $.ajax({
-            url: `/api/items/${itemId}`, // Backend endpoint for updating the item
+            url: `../items?id=${itemId}`, // Backend endpoint for updating the item with ID as a query parameter
             method: 'PUT',
             contentType: 'application/json',
             data: JSON.stringify(updatedItem),

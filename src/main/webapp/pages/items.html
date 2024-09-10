@@ -73,7 +73,6 @@
                 type: 'GET',
                 success: function(response) {
                     const items = response;
-                    console.log(items);
                     let tableBody = $('#itemTableBody');
                     tableBody.empty(); // Clear existing rows
                     items.forEach(item => {
