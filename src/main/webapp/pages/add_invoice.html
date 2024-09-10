@@ -65,7 +65,7 @@
         <!-- Hidden input for selected items -->
         <input type="hidden" id="selectedItems" name="selectedItems">
 
-        <button type="button" class="btn btn-primary" id="saveDraftButton">Save Draft</button>
+        <!-- Removed Save Draft Button -->
         <button type="submit" class="btn btn-success">Submit Invoice</button>
         <a href="invoice.html" class="btn btn-secondary">Cancel</a>
     </form>
@@ -77,8 +77,9 @@
         document.getElementById('date').value = today;
     }
 
-    const selectedItems = new Map();
+    const selectedItems = new Map();  // This will hold all selected items
 
+    // This function adds an item to the invoice, updating the map only
     function addItemToInvoice(id, name, price) {
         if (selectedItems.has(id)) {
             const item = selectedItems.get(id);
@@ -87,14 +88,18 @@
         } else {
             selectedItems.set(id, { id, name, price, quantity: 1, total: price });
         }
-        updateSelectedItemsTable();
+        updateSelectedItemsTable();  // Update the table UI
+        storeTemporaryData();  // Store temporarily in localStorage
     }
 
+    // Remove an item from the invoice
     function removeItemFromInvoice(id) {
         selectedItems.delete(id);
         updateSelectedItemsTable();
+        storeTemporaryData();  // Store temporarily in localStorage
     }
 
+    // Update the table displaying the selected items
     function updateSelectedItemsTable() {
         const tableBody = $('#selectedItemsTableBody');
         tableBody.empty();
@@ -114,20 +119,23 @@
             totalAmount += item.total;
         });
 
-        $('#total').val(totalAmount.toFixed(2));
-        updateHiddenSelectedItemsField();
+        $('#total').val(totalAmount.toFixed(2));  // Update total price
+        updateHiddenSelectedItemsField();  // Update hidden input for form
     }
 
+    // Handle quantity changes
     function updateQuantity(id, quantity) {
-        if (quantity < 1) quantity = 1;
+        if (quantity < 1) quantity = 1;  // Ensure quantity is at least 1
         if (selectedItems.has(id)) {
             const item = selectedItems.get(id);
             item.quantity = parseInt(quantity, 10);
             item.total = item.quantity * item.price;
-            updateSelectedItemsTable();
+            updateSelectedItemsTable();  // Update table UI
         }
+        storeTemporaryData();  // Store temporarily in localStorage
     }
 
+    // Update hidden form field to hold the selected items
     function updateHiddenSelectedItemsField() {
         const selectedItemsArray = Array.from(selectedItems.values()).map(item => {
             return { id: item.id, quantity: item.quantity };
@@ -135,14 +143,15 @@
         $('#selectedItems').val(JSON.stringify(selectedItemsArray));
     }
 
+    // Fetch items from the server (no interaction until "Submit")
     function fetchItems() {
         $.ajax({
-            url: '../items', // Adjust this URL according to your backend logic
+            url: '../items',  // Adjust this URL according to your backend logic
             type: 'POST',
             success: function(response) {
                 const items = response;
                 let tableBody = $('#availableItemsTableBody');
-                tableBody.empty(); // Clear existing rows
+                tableBody.empty();  // Clear existing rows
                 items.forEach(item => {
                     tableBody.append(`
                         <tr id="item-${item.id}">
@@ -164,77 +173,71 @@
         });
     }
 
-    function saveDraft() {
+    // Store temporary data in localStorage after each modification
+    function storeTemporaryData() {
         const formData = {
             date: $('#date').val(),
             total: $('#total').val(),
             selectedItems: $('#selectedItems').val()
         };
-        localStorage.setItem('invoiceDraft', JSON.stringify(formData));
-        alert('Draft saved successfully!');
+        localStorage.setItem('invoiceTempData', JSON.stringify(formData));  // Store temporary data
     }
 
+    // Submit the final invoice and send data to the server
     function submitInvoice() {
-        // Update hidden field with selected items before serializing
+        // Before submitting, update hidden input field with selected items
         updateHiddenSelectedItemsField();
 
         $.ajax({
             type: 'POST',
-            url: '../invoices?action=add', // Adjust this URL according to your backend logic
-            data: $('#addInvoiceForm').serialize(),
+            url: '../invoices?action=add',  // Adjust this URL according to your backend logic
+            data: $('#addInvoiceForm').serialize(),  // Send serialized form data
             success: function(response) {
-                if (response.success) { // Assuming the server returns a JSON object with a success flag
-                    window.location.href = 'invoices.jsp';
+                if (response.success) {  // Assuming the server returns a success flag
+                    localStorage.removeItem('invoiceTempData');  // Clear temporary data on success
+                    window.location.href = 'invoices.jsp';  // Redirect to invoices page
                 } else {
                     alert('Failed to save invoice: ' + response.message);
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error:', error); // Log the error to the console for debugging
+                console.error('Error:', error);  // Log error for debugging
                 alert('Failed to save invoice.');
             }
         });
     }
 
-    // Handle Save Draft button click
-    $('#saveDraftButton').on('click', function(e) {
-        e.preventDefault();
-        saveDraft();
-    });
-
-    // Handle Add Invoice form submission
+    // Handle form submission for the invoice
     $('#addInvoiceForm').on('submit', function(e) {
         e.preventDefault();
-        submitInvoice();
+        submitInvoice();  // Submit the invoice when "Save" is clicked
     });
 
-    // Fetch items and set date when the page loads
+    // Fetch items and initialize page when ready
     $(document).ready(function() {
         fetchItems();
-        setCurrentDate(); // Set the current date on page load
+        setCurrentDate();  // Set current date on page load
 
-        // Load saved draft if it exists
-        const savedDraft = localStorage.getItem('invoiceDraft');
-        if (savedDraft) {
-            const formData = JSON.parse(savedDraft);
+        // Load temporary data if it exists in localStorage
+        const tempData = localStorage.getItem('invoiceTempData');
+        if (tempData) {
+            const formData = JSON.parse(tempData);
             $('#date').val(formData.date);
             $('#total').val(formData.total);
             $('#selectedItems').val(formData.selectedItems);
-            // Update the selected items table based on saved draft
+
+            // Update selected items table with stored data
             const itemsArray = JSON.parse(formData.selectedItems);
             itemsArray.forEach(item => {
                 const { id, quantity } = item;
                 if (!selectedItems.has(id)) {
-                    // Fetch item details if necessary and add to selectedItems map
-                    // For simplicity, assuming items are already fetched
-                    // In real use case, you would need to fetch item details based on id
                     selectedItems.set(id, { id, name: '', price: 0, quantity: parseInt(quantity, 10), total: 0 });
                 }
                 const selectedItem = selectedItems.get(id);
                 selectedItem.quantity = quantity;
                 selectedItem.total = selectedItem.quantity * selectedItem.price;
             });
-            updateSelectedItemsTable();
+            updateSelectedItemsTable();  // Update the table with stored data
         }
     });
 </script>
