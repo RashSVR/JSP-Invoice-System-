@@ -107,16 +107,16 @@
 
         $('#confirmDeleteBtn').click(function() {
             $.ajax({
-                url: '../items',  // Adjust this URL according to your backend logic
+                url: `../items?id=${deleteItemId}`, // Send ID as a query parameter
                 type: 'DELETE',
-                data: {id: deleteItemId},
                 success: function() {
                     $(`#item-${deleteItemId}`).remove();
                     $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item deleted successfully').show();
                     setTimeout(() => $('#alertDiv').hide(), 3000);
                     $('#deleteConfirmationModal').modal('hide');
                 },
-                error: function() {
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Error deleting item:', textStatus, errorThrown); // Debugging line
                     $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to delete item').show();
                     setTimeout(() => $('#alertDiv').hide(), 3000);
                     $('#deleteConfirmationModal').modal('hide');
