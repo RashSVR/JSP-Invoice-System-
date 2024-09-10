@@ -108,8 +108,9 @@
 
         $('#confirmDeleteBtn').click(function() {
             $.ajax({
-                url: `../items?id=${deleteItemId}`, // Send ID as a query parameter
+                url: `../items`, // Send ID as a query parameter
                 type: 'POST',
+                data: $.param('id='${deleteItemId}) + '&action=delete',
                 success: function() {
                     $(`#item-${deleteItemId}`).remove();
                     $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item deleted successfully').show();

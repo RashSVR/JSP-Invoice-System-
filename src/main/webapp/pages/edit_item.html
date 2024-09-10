@@ -48,14 +48,14 @@
                 $('#itemPrice').val(item.price);
                 $('#itemQuantity').val(item.quantity);
             },
-            error: function() {
+            error: function () {
                 alert('Failed to load item data.');
                 window.location.href = 'items.html';
             }
         });
     }
 
-    $('#editItemForm').on('submit', function(e) {
+    $('#editItemForm').on('submit', function (e) {
         e.preventDefault();
 
         const updatedItem = {
@@ -71,13 +71,12 @@
         $.ajax({
             url: `../items?id=${itemId}`,
             method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(updatedItem),
-            success: function(response) {
+            data: $.param(updatedItem) + '&action=edit',
+            success: function (response) {
                 alert('Item updated successfully.');
                 window.location.href = 'items.html';
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 alert('Failed to update item: ' + xhr.responseText);
             }
         });

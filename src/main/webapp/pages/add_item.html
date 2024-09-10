@@ -49,12 +49,12 @@
         $.ajax({
             url: '../items', // Your backend endpoint for adding items
             method: 'POST',
-            data: $.param(newItem) + '&action=insert', // Include the action parameter
+            data: $.param(newItem) + '&action=add', // Include the action parameter
             success: function(response) {
                 $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item added successfully.').show();
-                setTimeout(function() {
-                    window.location.href = 'items.html'; // Redirect to items list or any other page
-                }, 2000); // Delay to let the user see the success message
+                // setTimeout(function() {
+                //     window.location.href = 'items.html'; // Redirect to items list or any other page
+                // }, 2000); // Delay to let the user see the success message
             },
             error: function() {
                 $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to add item. Please try again.').show();
