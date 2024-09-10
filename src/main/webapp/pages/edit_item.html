@@ -37,53 +37,52 @@
     const queryParams = new URLSearchParams(window.location.search);
     const itemId = queryParams.get('id');  // Get item ID from the URL
 
-    // Function to load the item details based on the item ID
     function loadItem() {
         $.ajax({
-            url: `../items?id=${itemId}`, // Backend endpoint to fetch the item details with ID as a query parameter
+            url: `../items?id=${itemId}`,
             method: 'GET',
             success: function (data) {
-                obj1 = data[0];
-                $('#itemName').val(obj1.name);
-                $('#itemDescription').val(obj1.description);
-                $('#itemPrice').val(obj1.price);
-                $('#itemQuantity').val(obj1.quantity);
+                const item = data[0];
+                $('#itemName').val(item.name);
+                $('#itemDescription').val(item.description);
+                $('#itemPrice').val(item.price);
+                $('#itemQuantity').val(item.quantity);
             },
             error: function() {
                 alert('Failed to load item data.');
-                window.location.href = 'items.html'; // Redirect if item loading fails
+                window.location.href = 'items.html';
             }
         });
     }
 
-    // Handle form submission for editing item
     $('#editItemForm').on('submit', function(e) {
         e.preventDefault();
 
         const updatedItem = {
+            id: itemId,
             name: $('#itemName').val(),
             description: $('#itemDescription').val(),
-            price: $('#itemPrice').val(),
-            quantity: $('#itemQuantity').val()
+            price: parseFloat($('#itemPrice').val()).toFixed(2),  // Ensure price is formatted as a float with 2 decimal places
+            quantity: parseInt($('#itemQuantity').val(), 10)  // Ensure quantity is an integer
         };
 
-        // AJAX call to update the item in the database
+        console.log('Sending Updated Item:', JSON.stringify(updatedItem));
+
         $.ajax({
-            url: `../items?id=${itemId}`, // Backend endpoint for updating the item with ID as a query parameter
+            url: `../items?id=${itemId}`,
             method: 'PUT',
-            // contentType: 'application/json',
-            data: $.param(updatedItem),
+            contentType: 'application/json',
+            data: JSON.stringify(updatedItem),
             success: function(response) {
                 alert('Item updated successfully.');
-                window.location.href = 'items.html'; // Redirect to items list or any other page
+                window.location.href = 'items.html';
             },
-            error: function() {
-                alert('Failed to update item. Please try again.');
+            error: function(xhr) {
+                alert('Failed to update item: ' + xhr.responseText);
             }
         });
     });
 
-    // Load the item details when the page loads
     $(document).ready(function () {
         loadItem();
     });

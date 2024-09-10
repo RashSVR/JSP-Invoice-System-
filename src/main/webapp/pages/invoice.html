@@ -7,7 +7,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<div class="container mt-5">
+<div class="container-fluid mt-5">
     <h1 class="text-center mb-4">Manage Invoices</h1>
 
     <!-- Alert Div for Messages -->
@@ -22,35 +22,35 @@
             <h4>Invoices</h4>
         </div>
         <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th>Total</th>
-                    <th>Items</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody id="invoiceTableBody">
-                <c:forEach var="invoice" items="${invoices}">
-                    <tr id="invoice-${invoice.id}">
-                        <td>${invoice.id}</td>
-                        <td>${invoice.date}</td>
-                        <td>${invoice.customer}</td>
-                        <td>${invoice.total}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="viewItems(${invoice.id})">View Items</button>
-                        </td>
-                        <td>
-                            <a href="edit_invoice.html?id=${invoice.id}" class="btn btn-primary btn-sm">Edit</a>
-                            <button class="btn btn-danger btn-sm" onclick="showDeleteModal(${invoice.id})">Delete</button>
-                        </td>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Items</th>
+                        <th>Actions</th>
                     </tr>
-                </c:forEach>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="invoiceTableBody">
+                    <c:forEach var="invoice" items="${invoices}">
+                        <tr id="invoice-${invoice.id}">
+                            <td>${invoice.id}</td>
+                            <td>${invoice.date}</td>
+                            <td>${invoice.total}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="viewItems(${invoice.id})">View Items</button>
+                            </td>
+                            <td>
+                                <a href="edit_invoice.html?id=${invoice.id}" class="btn btn-primary btn-sm">Edit</a>
+                                <button class="btn btn-danger btn-sm" onclick="showDeleteModal(${invoice.id})">Delete</button>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -66,19 +66,21 @@
                 </button>
             </div>
             <div class="modal-body">
-                <table class="table table-bordered" id="itemsTable">
-                    <thead>
-                    <tr>
-                        <th>Item ID</th>
-                        <th>Name</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                    </tr>
-                    </thead>
-                    <tbody id="itemsTableBody">
-                    <!-- Items will be dynamically loaded here -->
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="itemsTable">
+                        <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                        <!-- Items will be dynamically loaded here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
