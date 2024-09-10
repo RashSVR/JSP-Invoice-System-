@@ -40,7 +40,7 @@
     function loadItem() {
         $.ajax({
             url: `../items?id=${itemId}`,
-            method: 'GET',
+            method: 'POST',
             success: function (data) {
                 const item = data[0];
                 $('#itemName').val(item.name);
@@ -70,7 +70,7 @@
 
         $.ajax({
             url: `../items?id=${itemId}`,
-            method: 'PUT',
+            method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(updatedItem),
             success: function(response) {

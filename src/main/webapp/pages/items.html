@@ -72,7 +72,7 @@
         function fetchItems() {
             $.ajax({
                 url: '../items', // Adjust this URL according to your backend logic
-                type: 'GET',
+                type: 'POST',
                 success: function(response) {
                     const items = response;
                     let tableBody = $('#itemTableBody');
@@ -109,7 +109,7 @@
         $('#confirmDeleteBtn').click(function() {
             $.ajax({
                 url: `../items?id=${deleteItemId}`, // Send ID as a query parameter
-                type: 'DELETE',
+                type: 'POST',
                 success: function() {
                     $(`#item-${deleteItemId}`).remove();
                     $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item deleted successfully').show();
