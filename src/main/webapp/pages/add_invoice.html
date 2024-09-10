@@ -166,7 +166,7 @@
 
         $.ajax({
             type: 'POST',
-            url: 'InvoiceServlet?action=insert',
+            url: '../invoices?action=add',
             data: $(this).serialize(),
             success: function(response) {
                 window.location.href = 'invoices.jsp';
