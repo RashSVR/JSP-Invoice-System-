@@ -137,7 +137,7 @@
 
         $('#confirmDeleteBtn').click(function() {
             $.ajax({
-                url: `InvoiceServlet?action=delete&id=${deleteInvoiceId}`, // Send ID as a query parameter
+                url: `../invoices?id=${deleteInvoiceId}&action=delete`, // Send ID as a query parameter
                 type: 'POST',
                 success: function() {
                     $(`#invoice-${deleteInvoiceId}`).remove();
