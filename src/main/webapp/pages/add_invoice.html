@@ -161,7 +161,7 @@
                             <td>${item.quantity}</td>
                             <td>${item.price}</td>
                             <td>
-                                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
+                                <div class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</div>
                             </td>
                         </tr>
                     `);
@@ -193,9 +193,9 @@
             url: '../invoices?action=add',  // Adjust this URL according to your backend logic
             data: $('#addInvoiceForm').serialize(),  // Send serialized form data
             success: function(response) {
-                if (response.success) {  // Assuming the server returns a success flag
+                if (response) {  // Assuming the server returns a success flag
                     localStorage.removeItem('invoiceTempData');  // Clear temporary data on success
-                    window.location.href = 'invoices.jsp';  // Redirect to invoices page
+                    // window.location.href = 'invoices.html';  // Redirect to invoices page
                 } else {
                     alert('Failed to save invoice: ' + response.message);
                 }

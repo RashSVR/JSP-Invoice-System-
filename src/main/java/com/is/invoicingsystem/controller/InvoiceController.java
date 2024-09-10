@@ -95,7 +95,7 @@ public class InvoiceController extends HttpServlet {
             invoiceItemDao.saveInvoiceItame(invoiceItem);
         });
         response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpServletResponse.SC_CREATED);
         response.getWriter().write(invoiceJson);
     }
 
