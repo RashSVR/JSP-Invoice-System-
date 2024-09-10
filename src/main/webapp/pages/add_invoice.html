@@ -62,10 +62,11 @@
             </table>
         </div>
 
-        <!-- Hidden inputs for selected items -->
+        <!-- Hidden input for selected items -->
         <input type="hidden" id="selectedItems" name="selectedItems">
 
-        <button type="submit" class="btn btn-success">Save Invoice</button>
+        <button type="button" class="btn btn-primary" id="saveDraftButton">Save Draft</button>
+        <button type="submit" class="btn btn-success">Submit Invoice</button>
         <a href="invoice.html" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
@@ -76,20 +77,21 @@
         document.getElementById('date').value = today;
     }
 
-    const selectedItems = {};
+    const selectedItems = new Map();
 
     function addItemToInvoice(id, name, price) {
-        if (selectedItems[id]) {
-            selectedItems[id].quantity += 1;
+        if (selectedItems.has(id)) {
+            const item = selectedItems.get(id);
+            item.quantity += 1;
+            item.total = item.quantity * item.price;
         } else {
-            selectedItems[id] = { id, name, price, quantity: 1 };
+            selectedItems.set(id, { id, name, price, quantity: 1, total: price });
         }
-        selectedItems[id].total = selectedItems[id].quantity * selectedItems[id].price;
         updateSelectedItemsTable();
     }
 
     function removeItemFromInvoice(id) {
-        delete selectedItems[id];
+        selectedItems.delete(id);
         updateSelectedItemsTable();
     }
 
@@ -98,8 +100,7 @@
         tableBody.empty();
         let totalAmount = 0;
 
-        for (const id in selectedItems) {
-            const item = selectedItems[id];
+        selectedItems.forEach(item => {
             tableBody.append(`
                 <tr>
                     <td>${item.id}</td>
@@ -111,7 +112,7 @@
                 </tr>
             `);
             totalAmount += item.total;
-        }
+        });
 
         $('#total').val(totalAmount.toFixed(2));
         updateHiddenSelectedItemsField();
@@ -119,18 +120,19 @@
 
     function updateQuantity(id, quantity) {
         if (quantity < 1) quantity = 1;
-        if (selectedItems[id]) {
-            selectedItems[id].quantity = parseInt(quantity, 10);
-            selectedItems[id].total = selectedItems[id].quantity * selectedItems[id].price;
+        if (selectedItems.has(id)) {
+            const item = selectedItems.get(id);
+            item.quantity = parseInt(quantity, 10);
+            item.total = item.quantity * item.price;
             updateSelectedItemsTable();
         }
     }
 
     function updateHiddenSelectedItemsField() {
-        const selectedItemsArray = Object.values(selectedItems).map(item => {
+        const selectedItemsArray = Array.from(selectedItems.values()).map(item => {
             return `${item.id}:${item.quantity}`;
         });
-        $('#selectedItems').val(selectedItemsArray.join(','));
+        $('#selectedItems').val(JSON.stringify(selectedItemsArray));
     }
 
     function fetchItems() {
@@ -162,20 +164,27 @@
         });
     }
 
-    // Handle Add Invoice form submission
-    $('#addInvoiceForm').on('submit', function(e) {
-        e.preventDefault();
+    function saveDraft() {
+        const formData = {
+            date: $('#date').val(),
+            total: $('#total').val(),
+            selectedItems: $('#selectedItems').val()
+        };
+        localStorage.setItem('invoiceDraft', JSON.stringify(formData));
+        alert('Draft saved successfully!');
+    }
 
+    function submitInvoice() {
         // Update hidden field with selected items before serializing
         updateHiddenSelectedItemsField();
 
         $.ajax({
             type: 'POST',
-            url: '../invoices?action=add',
-            data: $(this).serialize(),
+            url: 'InvoiceServlet?action=insert', // Adjust this URL according to your backend logic
+            data: $('#addInvoiceForm').serialize(),
             success: function(response) {
                 if (response.success) { // Assuming the server returns a JSON object with a success flag
-                    window.location.href = 'invoice.html';
+                    window.location.href = 'invoices.jsp';
                 } else {
                     alert('Failed to save invoice: ' + response.message);
                 }
@@ -185,12 +194,48 @@
                 alert('Failed to save invoice.');
             }
         });
+    }
+
+    // Handle Save Draft button click
+    $('#saveDraftButton').on('click', function(e) {
+        e.preventDefault();
+        saveDraft();
     });
 
-    // Fetch items when the page loads
+    // Handle Add Invoice form submission
+    $('#addInvoiceForm').on('submit', function(e) {
+        e.preventDefault();
+        submitInvoice();
+    });
+
+    // Fetch items and set date when the page loads
     $(document).ready(function() {
         fetchItems();
         setCurrentDate(); // Set the current date on page load
+
+        // Load saved draft if it exists
+        const savedDraft = localStorage.getItem('invoiceDraft');
+        if (savedDraft) {
+            const formData = JSON.parse(savedDraft);
+            $('#date').val(formData.date);
+            $('#total').val(formData.total);
+            $('#selectedItems').val(formData.selectedItems);
+            // Update the selected items table based on saved draft
+            const itemsArray = JSON.parse(formData.selectedItems);
+            itemsArray.forEach(item => {
+                const [id, quantity] = item.split(':');
+                if (!selectedItems.has(id)) {
+                    // Fetch item details if necessary and add to selectedItems map
+                    // For simplicity, assuming items are already fetched
+                    // In real use case, you would need to fetch item details based on id
+                    selectedItems.set(id, { id, name: '', price: 0, quantity: parseInt(quantity, 10), total: 0 });
+                }
+                const selectedItem = selectedItems.get(id);
+                selectedItem.quantity = quantity;
+                selectedItem.total = selectedItem.quantity * selectedItem.price;
+            });
+            updateSelectedItemsTable();
+        }
     });
 </script>
 </body>
