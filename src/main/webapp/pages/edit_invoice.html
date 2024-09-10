@@ -10,8 +10,8 @@
 </head>
 <body>
 <div class="container mt-5">
-  <h1 class="text-center mb-4">Add Invoice</h1>
-  <form id="addInvoiceForm">
+  <h1 class="text-center mb-4">Edit Invoice</h1>
+  <form id="editInvoiceForm">
     <div class="form-group">
       <label for="date">Date</label>
       <input type="date" class="form-control" id="date" name="date" required>
@@ -62,42 +62,15 @@
       </table>
     </div>
 
+    <!-- Hidden input for selected items -->
+    <input type="hidden" id="selectedItems" name="selectedItems">
+
     <button type="submit" class="btn btn-success">Save Invoice</button>
     <a href="invoice.html" class="btn btn-secondary">Cancel</a>
   </form>
 </div>
 
 <script>
-  // Fetch items and populate the available items table
-  function fetchItems() {
-    $.ajax({
-      url: '../items', // Adjust this URL according to your backend logic
-      type: 'POST',
-      success: function(response) {
-        const items = response;
-        let tableBody = $('#itemTableBody');
-        tableBody.empty(); // Clear existing rows
-        items.forEach(item => {
-          tableBody.append(`
-                        <tr id="item-${item.id}">
-                            <td>${item.id}</td>
-                            <td>${item.name}</td>
-                            <td>${item.description}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.price}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
-                            </td>
-                        </tr>
-                    `);
-        });
-      },
-      error: function() {
-        alert('Failed to load items');
-      }
-    });
-  }
-
   const selectedItems = {};
 
   function addItemToInvoice(id, name, price) {
@@ -136,6 +109,7 @@
     }
 
     $('#total').val(totalAmount.toFixed(2));
+    updateHiddenSelectedItemsField();
   }
 
   function updateQuantity(id, quantity) {
@@ -147,13 +121,49 @@
     }
   }
 
-  // Handle Add Invoice form submission
-  $('#addInvoiceForm').on('submit', function(e) {
+  function updateHiddenSelectedItemsField() {
+    const selectedItemsArray = Object.values(selectedItems).map(item => {
+      return `${item.id}:${item.quantity}`;
+    });
+    $('#selectedItems').val(selectedItemsArray.join(','));
+  }
+
+  function fetchItems() {
+    $.ajax({
+      url: '../items', // Adjust this URL according to your backend logic
+      type: 'POST',
+      success: function(response) {
+        const items = response;
+        let tableBody = $('#itemTableBody');
+        tableBody.empty(); // Clear existing rows
+        items.forEach(item => {
+          tableBody.append(`
+                        <tr id="item-${item.id}">
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.description}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price}</td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
+                            </td>
+                        </tr>
+                    `);
+        });
+      },
+      error: function() {
+        alert('Failed to load items');
+      }
+    });
+  }
+
+  // Handle Edit Invoice form submission
+  $('#editInvoiceForm').on('submit', function(e) {
     e.preventDefault();
 
     $.ajax({
       type: 'POST',
-      url: 'InvoiceServlet?action=insert',
+      url: 'InvoiceServlet?action=update', // Assuming you're updating an existing invoice
       data: $(this).serialize(),
       success: function(response) {
         window.location.href = 'invoices.jsp';
