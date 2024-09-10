@@ -69,10 +69,11 @@
 
         function fetchItems() {
             $.ajax({
-                url: 'items', // Adjust this URL according to your backend logic
+                url: '../items', // Adjust this URL according to your backend logic
                 type: 'GET',
                 success: function(response) {
-                    const items = response.items;
+                    const items = response;
+                    console.log(items);
                     let tableBody = $('#itemTableBody');
                     tableBody.empty(); // Clear existing rows
                     items.forEach(item => {
@@ -106,7 +107,7 @@
 
         $('#confirmDeleteBtn').click(function() {
             $.ajax({
-                url: 'items',  // Adjust this URL according to your backend logic
+                url: '../items',  // Adjust this URL according to your backend logic
                 type: 'DELETE',
                 data: {id: deleteItemId},
                 success: function() {
