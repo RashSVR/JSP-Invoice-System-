@@ -19,9 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @WebServlet("/invoices")
@@ -52,12 +50,7 @@ public class InvoiceController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-
-        if (action == null) {
-            response.sendRedirect("invoices");
-            return;
-        }
-
+        if (Objects.nonNull(action)) {
         switch (action) {
             case "add":
                 addInvoice(request, response);
@@ -68,9 +61,46 @@ public class InvoiceController extends HttpServlet {
             case "delete":
                 deleteInvoice(request, response);
                 break;
-            default:
-                response.sendRedirect("invoices");
-                break;
+        }}else {
+            getInvoices(request, response);
+        }
+    }
+
+    private void getInvoices(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        List<Invoice> invoices = new ArrayList<>();
+        String idParam = request.getParameter("id");
+        Long id = 0L;
+
+        try {
+            // Validate id parameter
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                id = Long.parseLong(idParam);
+            }
+
+            // Fetch item by id if present
+            if (id != 0) {
+                Invoice invoice = invoiceDao.getInvoiceById(id);
+                if (invoice != null) {
+                    invoices.add(invoice);
+                } else {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Item with ID " + id + " not found.");
+                    return;
+                }
+            } else {
+                invoices = invoiceDao.getAllInvoices();
+            }
+
+            // Return the items as JSON
+            String itemJson = gson.toJson(invoices);
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().print(itemJson);
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid 'id' parameter: must be a valid number.");
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing the request.");
+            e.printStackTrace();
         }
     }
 

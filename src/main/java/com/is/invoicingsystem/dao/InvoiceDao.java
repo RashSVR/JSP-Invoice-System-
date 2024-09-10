@@ -1,6 +1,7 @@
 package com.is.invoicingsystem.dao;
 
 import com.is.invoicingsystem.model.Invoice;
+import com.is.invoicingsystem.model.Item;
 import com.is.invoicingsystem.utils.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -11,6 +12,12 @@ public class InvoiceDao {
     public List<Invoice> getAllInvoices() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("from Invoice", Invoice.class).list();
+        }
+    }
+
+    public Invoice getInvoiceById(Long id) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.get(Invoice.class, id);
         }
     }
 
