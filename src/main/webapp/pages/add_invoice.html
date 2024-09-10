@@ -19,30 +19,150 @@
 
         <div class="form-group">
             <label for="total">Total</label>
-            <input type="number" class="form-control" id="total" name="total" step="0.01" required>
+            <input type="number" class="form-control" id="total" name="total" step="0.01" readonly>
         </div>
 
-        <!-- Section to add items to invoice -->
-        <div class="form-group">
-            <label for="items">Items</label>
-            <select class="form-control" id="items" name="items[]" multiple>
-                <c:forEach var="item" items="${items}">
-                    <option value="${item.id}">${item.name} - ${item.price}</option>
-                </c:forEach>
-            </select>
-            <small class="form-text text-muted">Select multiple items for the invoice.</small>
+        <!-- Available Items Table -->
+        <h3>Available Items</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="availableItemsTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="availableItemsTableBody">
+                <!-- Items will be dynamically inserted here -->
+                </tbody>
+            </table>
         </div>
+
+        <!-- Selected Items Table -->
+        <h3>Selected Items</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered" id="selectedItemsTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody id="selectedItemsTableBody">
+                <!-- Items added to the invoice will appear here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Hidden inputs for selected items -->
+        <input type="hidden" id="selectedItems" name="selectedItems">
 
         <button type="submit" class="btn btn-success">Save Invoice</button>
         <a href="invoice.html" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
+    const selectedItems = {};
+
+    function addItemToInvoice(id, name, price) {
+        if (selectedItems[id]) {
+            selectedItems[id].quantity += 1;
+        } else {
+            selectedItems[id] = { id, name, price, quantity: 1 };
+        }
+        selectedItems[id].total = selectedItems[id].quantity * selectedItems[id].price;
+        updateSelectedItemsTable();
+    }
+
+    function removeItemFromInvoice(id) {
+        delete selectedItems[id];
+        updateSelectedItemsTable();
+    }
+
+    function updateSelectedItemsTable() {
+        const tableBody = $('#selectedItemsTableBody');
+        tableBody.empty();
+        let totalAmount = 0;
+
+        for (const id in selectedItems) {
+            const item = selectedItems[id];
+            tableBody.append(`
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${item.id}, this.value)"></td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${item.total.toFixed(2)}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeItemFromInvoice(${item.id})">Remove</button></td>
+                </tr>
+            `);
+            totalAmount += item.total;
+        }
+
+        $('#total').val(totalAmount.toFixed(2));
+        updateHiddenSelectedItemsField();
+    }
+
+    function updateQuantity(id, quantity) {
+        if (quantity < 1) quantity = 1;
+        if (selectedItems[id]) {
+            selectedItems[id].quantity = parseInt(quantity, 10);
+            selectedItems[id].total = selectedItems[id].quantity * selectedItems[id].price;
+            updateSelectedItemsTable();
+        }
+    }
+
+    function updateHiddenSelectedItemsField() {
+        const selectedItemsArray = Object.values(selectedItems).map(item => {
+            return `${item.id}:${item.quantity}`;
+        });
+        $('#selectedItems').val(selectedItemsArray.join(','));
+    }
+
+    function fetchItems() {
+        $.ajax({
+            url: '../items', // Adjust this URL according to your backend logic
+            type: 'POST',
+            success: function(response) {
+                const items = response;
+                let tableBody = $('#availableItemsTableBody');
+                tableBody.empty(); // Clear existing rows
+                items.forEach(item => {
+                    tableBody.append(`
+                        <tr id="item-${item.id}">
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.description}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price}</td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function() {
+                alert('Failed to load items');
+            }
+        });
+    }
+
     // Handle Add Invoice form submission
     $('#addInvoiceForm').on('submit', function(e) {
         e.preventDefault();
+
+        // Update hidden field with selected items before serializing
+        updateHiddenSelectedItemsField();
 
         $.ajax({
             type: 'POST',
@@ -55,6 +175,11 @@
                 alert('Failed to save invoice.');
             }
         });
+    });
+
+    // Fetch items when the page loads
+    $(document).ready(function() {
+        fetchItems();
     });
 </script>
 </body>
