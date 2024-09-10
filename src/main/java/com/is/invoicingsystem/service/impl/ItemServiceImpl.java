@@ -103,12 +103,20 @@ public class ItemServiceImpl implements ItemService {
 
     private Item getItemFromRequest(HttpServletRequest request) throws Exception {
         try {
-            String idStr = request.getParameter("id");
-            Long id = idStr != null && !idStr.isEmpty() ? Long.parseLong(idStr) : null;
+            String idStr = request.getParameter("id");  // Get the "id" parameter
+            Long id = (idStr != null && !idStr.isEmpty()) ? Long.parseLong(idStr) : null;
             String name = request.getParameter("name");
             String description = request.getParameter("description");
-            Long quantity = Long.parseLong(request.getParameter("quantity"));  // Ensure parsing is correct
-            BigDecimal price = new BigDecimal(request.getParameter("price"));  // Ensure parsing is correct
+            String quantityStr = request.getParameter("quantity");
+            String priceStr = request.getParameter("price");
+
+            System.out.println("name = "+name+"name = "+description+"name = "+quantityStr+"name = "+priceStr);
+
+            if (quantityStr == null || priceStr == null) {
+                throw new Exception("Quantity and price must not be null.");
+            }
+            Long quantity = Long.parseLong(quantityStr);
+            BigDecimal price = new BigDecimal(priceStr);
 
             Item item = new Item();
             item.setId(id);
