@@ -215,30 +215,10 @@
 
     // Fetch items and initialize page when ready
     $(document).ready(function() {
+        localStorage.removeItem('invoiceTempData');
         fetchItems();
         setCurrentDate();  // Set current date on page load
-
-        // Load temporary data if it exists in localStorage
-        const tempData = localStorage.getItem('invoiceTempData');
-        if (tempData) {
-            const formData = JSON.parse(tempData);
-            $('#date').val(formData.date);
-            $('#total').val(formData.total);
-            $('#selectedItems').val(formData.selectedItems);
-
-            // Update selected items table with stored data
-            const itemsArray = JSON.parse(formData.selectedItems);
-            itemsArray.forEach(item => {
-                const { id, quantity } = item;
-                if (!selectedItems.has(id)) {
-                    selectedItems.set(id, { id, name: '', price: 0, quantity: parseInt(quantity, 10), total: 0 });
-                }
-                const selectedItem = selectedItems.get(id);
-                selectedItem.quantity = quantity;
-                selectedItem.total = selectedItem.quantity * selectedItem.price;
-            });
-            updateSelectedItemsTable();  // Update the table with stored data
-        }
+        updateSelectedItemsTable();
     });
 </script>
 </body>

@@ -2,10 +2,14 @@ package com.is.invoicingsystem.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.is.invoicingsystem.dao.InvoiceDao;
+import com.is.invoicingsystem.dao.InvoiceItemDao;
 import com.is.invoicingsystem.dao.ItemDao;
 
 import com.is.invoicingsystem.model.Invoice;
+import com.is.invoicingsystem.model.InvoiceItem;
+import com.is.invoicingsystem.model.Item;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -25,11 +29,14 @@ public class InvoiceController extends HttpServlet {
     private InvoiceDao invoiceDao;
     private ItemDao itemDao;
     private ObjectMapper objectMapper;
-
+    private InvoiceItemDao invoiceItemDao;
+    private Gson gson;
     public void init() {
         invoiceDao = new InvoiceDao();
         itemDao = new ItemDao();
         objectMapper = new ObjectMapper();
+        invoiceItemDao = new InvoiceItemDao();
+        gson = new Gson();
     }
 
     @Override
@@ -69,23 +76,27 @@ public class InvoiceController extends HttpServlet {
 
     private void addInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
         double total = Double.parseDouble(request.getParameter("total"));
-        List<Map<String, Integer>> selectedItems = objectMapper.readValue(
+        List<Map<String, Long>> selectedItems = objectMapper.readValue(
                 request.getParameter("selectedItems"),
-                new TypeReference<List<Map<String, Integer>>>() {});
-
-        Map<Integer, Integer> resultMap = selectedItems.stream()
+                new TypeReference<List<Map<String, Long>>>() {});
+        Map<Long, Long> resultMap = selectedItems.stream()
                 .collect(Collectors.toMap(obj -> obj.get("id"), obj -> obj.get("quantity")));
-        System.out.println("selected items" + resultMap);
-        // Convert java.util.Date to java.time.LocalDate
-        Date date = new Date(); // current date
-//        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
         Invoice invoice = new Invoice();
         invoice.setDate(new Date()); // Set LocalDate
         invoice.setTotal(BigDecimal.valueOf(total));
-
         invoiceDao.saveInvoice(invoice);
-//        response.sendRedirect("invoices");
+        String invoiceJson = gson.toJson(invoice);
+        resultMap.forEach((k,v)->{
+            Item item = itemDao.getItemById(k);
+            InvoiceItem invoiceItem = new InvoiceItem();
+            invoiceItem.setInvoice(invoice);
+            invoiceItem.setItem(item);
+            invoiceItem.setQuantity(v);
+            invoiceItemDao.saveInvoiceItame(invoiceItem);
+        });
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().write(invoiceJson);
     }
 
     private void editInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
