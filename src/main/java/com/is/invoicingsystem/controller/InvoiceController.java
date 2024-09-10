@@ -61,8 +61,8 @@ public class InvoiceController extends HttpServlet {
 
     private void addInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
         double total = Double.parseDouble(request.getParameter("total"));
-        String[] selectedItems = request.getParameterValues("items");
-
+        String selectedItems = request.getParameter("selectedItems");
+        System.out.println("selected items"+selectedItems);
         // Convert java.util.Date to java.time.LocalDate
         Date date = new Date(); // current date
 //        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -72,7 +72,7 @@ public class InvoiceController extends HttpServlet {
         invoice.setTotal(BigDecimal.valueOf(total));
 
         invoiceDao.saveInvoice(invoice);
-        response.sendRedirect("invoices");
+//        response.sendRedirect("invoices");
     }
 
     private void editInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {

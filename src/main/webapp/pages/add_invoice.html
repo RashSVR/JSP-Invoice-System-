@@ -71,6 +71,11 @@
 </div>
 
 <script>
+    function setCurrentDate() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+    }
+
     const selectedItems = {};
 
     function addItemToInvoice(id, name, price) {
@@ -169,9 +174,14 @@
             url: '../invoices?action=add',
             data: $(this).serialize(),
             success: function(response) {
-                window.location.href = 'invoices.jsp';
+                if (response.success) { // Assuming the server returns a JSON object with a success flag
+                    window.location.href = 'invoice.html';
+                } else {
+                    alert('Failed to save invoice: ' + response.message);
+                }
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                console.error('Error:', error); // Log the error to the console for debugging
                 alert('Failed to save invoice.');
             }
         });
@@ -180,6 +190,7 @@
     // Fetch items when the page loads
     $(document).ready(function() {
         fetchItems();
+        setCurrentDate(); // Set the current date on page load
     });
 </script>
 </body>
