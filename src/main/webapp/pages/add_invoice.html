@@ -79,7 +79,7 @@
 
     const selectedItems = new Map();  // This will hold all selected items
 
-    // This function adds an item to the invoice, updating the map only
+    // Add item to invoice without making a server request
     function addItemToInvoice(id, name, price) {
         if (selectedItems.has(id)) {
             const item = selectedItems.get(id);
