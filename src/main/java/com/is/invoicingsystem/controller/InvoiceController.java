@@ -1,5 +1,7 @@
 package com.is.invoicingsystem.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.is.invoicingsystem.dao.InvoiceDao;
 import com.is.invoicingsystem.dao.ItemDao;
 
@@ -10,18 +12,24 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @WebServlet("/invoices")
 public class InvoiceController extends HttpServlet {
     private InvoiceDao invoiceDao;
     private ItemDao itemDao;
+    private ObjectMapper objectMapper;
 
     public void init() {
         invoiceDao = new InvoiceDao();
         itemDao = new ItemDao();
+        objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -61,8 +69,13 @@ public class InvoiceController extends HttpServlet {
 
     private void addInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
         double total = Double.parseDouble(request.getParameter("total"));
-        String selectedItems = request.getParameter("selectedItems");
-        System.out.println("selected items"+selectedItems);
+        List<Map<String, Integer>> selectedItems = objectMapper.readValue(
+                request.getParameter("selectedItems"),
+                new TypeReference<List<Map<String, Integer>>>() {});
+
+        Map<Integer, Integer> resultMap = selectedItems.stream()
+                .collect(Collectors.toMap(obj -> obj.get("id"), obj -> obj.get("quantity")));
+        System.out.println("selected items" + resultMap);
         // Convert java.util.Date to java.time.LocalDate
         Date date = new Date(); // current date
 //        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

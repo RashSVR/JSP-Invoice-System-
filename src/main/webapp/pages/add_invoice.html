@@ -180,7 +180,7 @@
 
         $.ajax({
             type: 'POST',
-            url: 'InvoiceServlet?action=insert', // Adjust this URL according to your backend logic
+            url: '../invoices?action=add', // Adjust this URL according to your backend logic
             data: $('#addInvoiceForm').serialize(),
             success: function(response) {
                 if (response.success) { // Assuming the server returns a JSON object with a success flag
