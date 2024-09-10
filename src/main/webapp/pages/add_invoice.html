@@ -223,7 +223,7 @@
             // Update the selected items table based on saved draft
             const itemsArray = JSON.parse(formData.selectedItems);
             itemsArray.forEach(item => {
-                const [id, quantity] = item.split(':');
+                const { id, quantity } = item;
                 if (!selectedItems.has(id)) {
                     // Fetch item details if necessary and add to selectedItems map
                     // For simplicity, assuming items are already fetched
