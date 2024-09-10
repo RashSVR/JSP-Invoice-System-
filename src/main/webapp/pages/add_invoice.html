@@ -130,7 +130,7 @@
 
     function updateHiddenSelectedItemsField() {
         const selectedItemsArray = Array.from(selectedItems.values()).map(item => {
-            return `${item.id}:${item.quantity}`;
+            return { id: item.id, quantity: item.quantity };
         });
         $('#selectedItems').val(JSON.stringify(selectedItemsArray));
     }

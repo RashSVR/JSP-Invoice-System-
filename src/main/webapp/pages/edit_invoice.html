@@ -102,15 +102,15 @@
 
     selectedItems.forEach(item => {
       tableBody.append(`
-                <tr>
-                    <td>${item.id}</td>
-                    <td>${item.name}</td>
-                    <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${item.id}, this.value)"></td>
-                    <td>${item.price.toFixed(2)}</td>
-                    <td>${item.total.toFixed(2)}</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="removeItemFromInvoice(${item.id})">Remove</button></td>
-                </tr>
-            `);
+        <tr>
+          <td>${item.id}</td>
+          <td>${item.name}</td>
+          <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${item.id}, this.value)"></td>
+          <td>${item.price.toFixed(2)}</td>
+          <td>${item.total.toFixed(2)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="removeItemFromInvoice(${item.id})">Remove</button></td>
+        </tr>
+      `);
       totalAmount += item.total;
     });
 
@@ -145,21 +145,42 @@
         tableBody.empty(); // Clear existing rows
         items.forEach(item => {
           tableBody.append(`
-                        <tr id="item-${item.id}">
-                            <td>${item.id}</td>
-                            <td>${item.name}</td>
-                            <td>${item.description}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.price}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
-                            </td>
-                        </tr>
-                    `);
+            <tr id="item-${item.id}">
+              <td>${item.id}</td>
+              <td>${item.name}</td>
+              <td>${item.description}</td>
+              <td>${item.quantity}</td>
+              <td>${item.price}</td>
+              <td>
+                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
+              </td>
+            </tr>
+          `);
         });
       },
       error: function() {
         alert('Failed to load items');
+      }
+    });
+  }
+
+  function loadInvoiceData(invoiceId) {
+    $.ajax({
+      url: `../invoices/${invoiceId}`, // Adjust this URL according to your backend logic
+      type: 'GET',
+      success: function(response) {
+        const invoice = response.invoice;
+        $('#date').val(invoice.date);
+        $('#total').val(invoice.total);
+
+        // Populate selected items
+        invoice.items.forEach(item => {
+          selectedItems.set(item.id, { id: item.id, name: item.name, price: item.price, quantity: item.quantity, total: item.quantity * item.price });
+        });
+        updateSelectedItemsTable();
+      },
+      error: function() {
+        alert('Failed to load invoice data');
       }
     });
   }
@@ -208,35 +229,19 @@
     submitInvoice();
   });
 
-  // Fetch items and set date when the page loads
+  // Fetch items and load invoice data when the page loads
   $(document).ready(function() {
     fetchItems();
-    setCurrentDate(); // Set the current date on page load
-
-    // Load saved draft if it exists
-    const savedDraft = localStorage.getItem('invoiceDraft');
-    if (savedDraft) {
-      const formData = JSON.parse(savedDraft);
-      $('#date').val(formData.date);
-      $('#total').val(formData.total);
-      $('#selectedItems').val(formData.selectedItems);
-      // Update the selected items table based on saved draft
-      const itemsArray = JSON.parse(formData.selectedItems);
-      itemsArray.forEach(item => {
-        const [id, quantity] = item.split(':');
-        if (!selectedItems.has(id)) {
-          // Fetch item details if necessary and add to selectedItems map
-          // For simplicity, assuming items are already fetched
-          // In real use case, you would need to fetch item details based on id
-          selectedItems.set(id, { id, name: '', price: 0, quantity: parseInt(quantity, 10), total: 0 });
-        }
-        const selectedItem = selectedItems.get(id);
-        selectedItem.quantity = quantity;
-        selectedItem.total = selectedItem.quantity * selectedItem.price;
-      });
-      updateSelectedItemsTable();
+    const invoiceId = getQueryStringParameter('invoiceId'); // Assume you get invoiceId from query string
+    if (invoiceId) {
+      loadInvoiceData(invoiceId);
     }
   });
+
+  function getQueryStringParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
 </script>
 </body>
 </html>
