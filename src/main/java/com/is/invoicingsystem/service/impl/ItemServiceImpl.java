@@ -103,6 +103,7 @@ public class ItemServiceImpl implements ItemService {
 
     private Item getItemFromRequest(HttpServletRequest request) throws Exception {
         try {
+            System.out.println("request = "+ request.toString());
             String idStr = request.getParameter("id");
             Long id = idStr != null && !idStr.isEmpty() ? Long.parseLong(idStr) : null;
             String name = request.getParameter("name");
@@ -119,6 +120,7 @@ public class ItemServiceImpl implements ItemService {
 
             return item;
         } catch (NumberFormatException e) {
+            e.printStackTrace();
             throw new Exception("Invalid format for number fields: quantity or price.");
         } catch (Exception e) {
             throw new Exception("Invalid input: " + e.getMessage());

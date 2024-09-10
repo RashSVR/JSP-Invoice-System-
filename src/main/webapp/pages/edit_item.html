@@ -21,6 +21,10 @@
             <textarea class="form-control" id="itemDescription" rows="3"></textarea>
         </div>
         <div class="form-group">
+            <label for="itemQuantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="itemQuantity" placeholder="Enter item quantity" required>
+        </div>
+        <div class="form-group">
             <label for="itemPrice" class="form-label">Price</label>
             <input type="number" step="0.01" class="form-control" id="itemPrice" required>
         </div>
@@ -39,9 +43,11 @@
             url: `../items?id=${itemId}`, // Backend endpoint to fetch the item details with ID as a query parameter
             method: 'GET',
             success: function (data) {
-                $('#itemName').val(data.name);
-                $('#itemDescription').val(data.description);
-                $('#itemPrice').val(data.price);
+                obj1 = data[0];
+                $('#itemName').val(obj1.name);
+                $('#itemDescription').val(obj1.description);
+                $('#itemPrice').val(obj1.price);
+                $('#itemQuantity').val(obj1.quantity);
             },
             error: function() {
                 alert('Failed to load item data.');
@@ -57,15 +63,16 @@
         const updatedItem = {
             name: $('#itemName').val(),
             description: $('#itemDescription').val(),
-            price: $('#itemPrice').val()
+            price: $('#itemPrice').val(),
+            quantity: $('#itemQuantity').val()
         };
 
         // AJAX call to update the item in the database
         $.ajax({
             url: `../items?id=${itemId}`, // Backend endpoint for updating the item with ID as a query parameter
             method: 'PUT',
-            contentType: 'application/json',
-            data: JSON.stringify(updatedItem),
+            // contentType: 'application/json',
+            data: $.param(updatedItem),
             success: function(response) {
                 alert('Item updated successfully.');
                 window.location.href = 'items.html'; // Redirect to items list or any other page
