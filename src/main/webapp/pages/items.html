@@ -82,9 +82,11 @@
         </div>
     </div>
 </div>
+
 <footer class="footer text-black text-center py-3 mt-auto">
     <p>&copy; 2024 Invoicing System. All rights reserved.</p>
 </footer>
+
 <script>
     $(document).ready(function() {
         fetchItems();
@@ -114,9 +116,17 @@
                     });
                 },
                 error: function() {
-                    $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load items').show();
+                    showAlert('Failed to load items', 'danger');
                 }
             });
+        }
+
+        function showAlert(message, type) {
+            $('#alertDiv').removeClass('alert-success alert-danger')
+                .addClass(`alert-${type}`)
+                .text(message)
+                .show();
+            setTimeout(() => $('#alertDiv').hide(), 3000);
         }
 
         let deleteItemId;
@@ -132,14 +142,12 @@
                 type: 'POST',
                 success: function() {
                     $(`#item-${deleteItemId}`).remove();
-                    $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item deleted successfully').show();
-                    setTimeout(() => $('#alertDiv').hide(), 3000);
+                    showAlert('Item deleted successfully', 'success');
                     $('#deleteConfirmationModal').modal('hide');
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error('Error deleting item:', textStatus, errorThrown); // Debugging line
-                    $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to delete item').show();
-                    setTimeout(() => $('#alertDiv').hide(), 3000);
+                    showAlert('Failed to delete item', 'danger');
                     $('#deleteConfirmationModal').modal('hide');
                 }
             });

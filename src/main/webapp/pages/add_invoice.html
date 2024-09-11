@@ -29,6 +29,10 @@
 </header>
 <div class="container mt-5">
     <h1 class="text-center mb-4">Add Invoice</h1>
+
+    <!-- Alert Div for Messages -->
+    <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
+
     <form id="addInvoiceForm">
         <div class="form-group">
             <label for="date">Date</label>
@@ -190,7 +194,7 @@
                 });
             },
             error: function() {
-                alert('Failed to load items');
+                $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load items').show();
             }
         });
     }
@@ -215,16 +219,17 @@
             url: '../invoices?action=add',  // Adjust this URL according to your backend logic
             data: $('#addInvoiceForm').serialize(),  // Send serialized form data
             success: function(response) {
-                if (response) {  // Assuming the server returns a success flag
+                if (response.success) {  // Assuming the server returns a success flag
+                    $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoice submitted successfully').show();
                     localStorage.removeItem('invoiceTempData');  // Clear temporary data on success
-                    // window.location.href = 'invoices.html';  // Redirect to invoices page
+                    setTimeout(() => window.location.href = 'invoice.html', 2000);  // Redirect after 2 seconds
                 } else {
-                    alert('Failed to save invoice: ' + response.message);
+                    $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to save invoice: ' + response.message).show();
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);  // Log error for debugging
-                alert('Failed to save invoice.');
+                $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to save invoice.').show();
             }
         });
     }

@@ -29,7 +29,10 @@
 </header>
 <div class="container mt-5">
     <h1 class="text-center mb-4">Add Item</h1>
+
+    <!-- Alert Div for success or error messages -->
     <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
+
     <form id="addItemForm">
         <div class="form-group">
             <label for="itemName" class="form-label">Item Name</label>
@@ -51,9 +54,11 @@
         <a href="items.html" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+
 <footer class="footer text-black text-center py-3 mt-auto">
     <p>&copy; 2024 Invoicing System. All rights reserved.</p>
 </footer>
+
 <script>
     // Handle form submission
     $('#addItemForm').on('submit', function(e) {
@@ -72,10 +77,12 @@
             method: 'POST',
             data: $.param(newItem) + '&action=add', // Include the action parameter
             success: function(response) {
+                // Check if the response indicates success
                 $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item added successfully.').show();
+                // Optional: Redirect to items list after showing success message
                 // setTimeout(function() {
-                //     window.location.href = 'items.html'; // Redirect to items list or any other page
-                // }, 2000); // Delay to let the user see the success message
+                //     window.location.href = 'items.html';
+                // }, 2000);
             },
             error: function() {
                 $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to add item. Please try again.').show();

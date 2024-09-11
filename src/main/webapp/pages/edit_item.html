@@ -29,6 +29,13 @@
 </header>
 <div class="container mt-5">
     <h1 class="text-center mb-4">Edit Item</h1>
+
+    <!-- Success and Error Messages -->
+    <div id="messages" style="display: none;">
+        <div id="successMessage" class="alert alert-success" role="alert" style="display: none;"></div>
+        <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none;"></div>
+    </div>
+
     <form id="editItemForm">
         <div class="form-group">
             <label for="itemName" class="form-label">Item Name</label>
@@ -57,6 +64,17 @@
     const queryParams = new URLSearchParams(window.location.search);
     const itemId = queryParams.get('id');  // Get item ID from the URL
 
+    function showMessage(type, message) {
+        $('#messages').show();
+        if (type === 'success') {
+            $('#successMessage').text(message).show();
+            $('#errorMessage').hide();
+        } else if (type === 'error') {
+            $('#errorMessage').text(message).show();
+            $('#successMessage').hide();
+        }
+    }
+
     function loadItem() {
         $.ajax({
             url: `../items?id=${itemId}`,
@@ -69,7 +87,7 @@
                 $('#itemQuantity').val(item.quantity);
             },
             error: function () {
-                alert('Failed to load item data.');
+                showMessage('error', 'Failed to load item data.');
                 window.location.href = 'items.html';
             }
         });
@@ -93,11 +111,13 @@
             method: 'POST',
             data: $.param(updatedItem) + '&action=edit',
             success: function (response) {
-                alert('Item updated successfully.');
-                window.location.href = 'items.html';
+                showMessage('success', 'Item updated successfully.');
+                setTimeout(() => {
+                    window.location.href = 'items.html';
+                }, 1500);
             },
             error: function (xhr) {
-                alert('Failed to update item: ' + xhr.responseText);
+                showMessage('error', 'Failed to update item: ' + xhr.responseText);
             }
         });
     });

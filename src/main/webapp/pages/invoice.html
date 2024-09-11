@@ -111,6 +111,7 @@
         </div>
     </div>
 </div>
+
 <footer class="footer text-black text-center py-3 mt-auto">
     <p>&copy; 2024 Invoicing System. All rights reserved.</p>
 </footer>
@@ -137,12 +138,13 @@
                                 </td>
                                 <td>
                                     <a href="edit_invoice.html?id=${invoice.id}" class="btn btn-primary btn-sm">Edit</a>
-
                                     <button class="btn btn-danger btn-sm" onclick="confirmDelete(${invoice.id})">Delete</button>
                                 </td>
                             </tr>
                         `);
                     });
+                    $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoices loaded successfully').show();
+                    setTimeout(() => $('#alertDiv').hide(), 3000);
                 },
                 error: function() {
                     $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load invoices').show();
@@ -183,7 +185,6 @@
                 dataType: 'json',
                 data: $.param({ id: invoiceId }),  // Send ID as URL-encoded form data
                 success: function(data) {
-                    console.log(data);  // Debugging: check the returned data
                     let itemsTableBody = $('#itemsTableBody');
                     itemsTableBody.empty(); // Clear previous items
 
@@ -204,14 +205,11 @@
                     $('#itemsModal').modal('show');  // Show the items modal
                 },
                 error: function(xhr, status, error) {
-                    console.log("Error: " + error);  // Debugging: log error
                     $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load invoice items.').show();
                 }
             });
         }
     });
 </script>
-
-
 </body>
 </html>
