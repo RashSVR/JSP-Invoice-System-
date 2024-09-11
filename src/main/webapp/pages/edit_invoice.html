@@ -14,7 +14,7 @@
   <form id="editInvoiceForm">
     <div class="form-group">
       <label for="date">Date</label>
-      <input type="date" class="form-control" id="date" name="date" required>
+      <input type="date" class="form-control" id="date" name="date"  readonly>
     </div>
 
     <div class="form-group">
@@ -71,10 +71,7 @@
 </div>
 
 <script>
-  function setCurrentDate() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('date').value = today;
-  }
+
 
   const selectedItems = new Map();  // This will hold all selected items
 
@@ -86,12 +83,14 @@
     } else {
       selectedItems.set(id, { id, name, price, quantity: 1, total: price });
     }
-    updateSelectedItemsTable();  // Update the table UI
+    updateSelectedItemsTable();
+    storeTemporaryData();  // Store temporarily in localStorage// Update the table UI
   }
 
   function removeItemFromInvoice(id) {
     selectedItems.delete(id);
     updateSelectedItemsTable();
+    storeTemporaryData();  // Store temporarily in localStorage
   }
 
   function updateSelectedItemsTable() {
@@ -125,6 +124,7 @@
       item.total = item.quantity * item.price;
       updateSelectedItemsTable();  // Update table UI
     }
+    storeTemporaryData();  // Store temporarily in localStorage
   }
 
   function updateHiddenSelectedItemsField() {
@@ -163,6 +163,15 @@
     });
   }
 
+  // Store temporary data in localStorage after each modification
+  function storeTemporaryData() {
+    const formData = {
+      date: $('#date').val(),
+      total: $('#total').val(),
+      selectedItems: $('#selectedItems').val()
+    };
+    localStorage.setItem('invoiceTempData', JSON.stringify(formData));  // Store temporary data
+  }
   function loadInvoiceData(invoiceId) {
     $.ajax({
       url: '../invoices?action=getItems',  // Adjust this URL according to your backend logic
@@ -196,15 +205,17 @@
   }
 
   function submitInvoice() {
-    updateHiddenSelectedItemsField();  // Ensure hidden field is updated
+    // Before submitting, update hidden input field with selected items
+    updateHiddenSelectedItemsField();
 
     $.ajax({
       type: 'POST',
       url: '../invoices?action=update',  // Adjust this URL according to your backend logic
-      data: $('#editInvoiceForm').serialize(),
+      data: $('#addInvoiceForm').serialize(),  // Send serialized form data
       success: function(response) {
-        if (response.success) {  // Assuming the server returns a success flag
-          window.location.href = 'invoices.html';  // Redirect to invoices page
+        if (response) {  // Assuming the server returns a success flag
+          localStorage.removeItem('invoiceTempData');  // Clear temporary data on success
+          // window.location.href = 'invoices.html';  // Redirect to invoices page
         } else {
           alert('Failed to save invoice: ' + response.message);
         }
@@ -222,12 +233,13 @@
   });
 
   $(document).ready(function() {
+    localStorage.removeItem('invoiceTempData');
     fetchItems();  // Fetch available items on page load
     const invoiceId = new URLSearchParams(window.location.search).get('id');
     if (invoiceId) {
       loadInvoiceData(invoiceId);  // Load invoice data if invoiceId is present
     }
-    setCurrentDate();  // Set current date on page load
+    updateSelectedItemsTable();
   });
 </script>
 </body>
