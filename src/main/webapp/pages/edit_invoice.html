@@ -166,16 +166,24 @@
 
   function loadInvoiceData(invoiceId) {
     $.ajax({
-      url: `../invoices/${invoiceId}`, // Adjust this URL according to your backend logic
-      type: 'GET',
+      url: '../invoices?action=getItems', // Updated URL
+      type: 'POST',
+      dataType: 'json',
+      data: $.param({ id: invoiceId }),
       success: function(response) {
         const invoice = response.invoice;
-        $('#date').val(invoice.date);
-        $('#total').val(invoice.total);
+        $('#date').val(new Date(invoice.date).toISOString().split('T')[0]);
+        $('#total').val(invoice.total.toFixed(2));
 
         // Populate selected items
-        invoice.items.forEach(item => {
-          selectedItems.set(item.id, { id: item.id, name: item.name, price: item.price, quantity: item.quantity, total: item.quantity * item.price });
+        response.invoiceItems.forEach(item => {
+          selectedItems.set(item.item.id, {
+            id: item.item.id,
+            name: item.item.name,
+            price: item.item.price,
+            quantity: item.quantity,
+            total: item.quantity * item.item.price
+          });
         });
         updateSelectedItemsTable();
       },
