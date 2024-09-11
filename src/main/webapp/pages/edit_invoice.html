@@ -13,11 +13,6 @@
   <h1 class="text-center mb-4">Edit Invoice</h1>
   <form id="editInvoiceForm">
     <div class="form-group">
-      <label for="date">Date</label>
-      <input type="date" class="form-control" id="date" name="date"  readonly>
-    </div>
-
-    <div class="form-group">
       <label for="total">Total</label>
       <input type="number" class="form-control" id="total" name="total" step="0.01" readonly>
     </div>
@@ -64,6 +59,8 @@
 
     <!-- Hidden input for selected items -->
     <input type="hidden" id="selectedItems" name="selectedItems">
+    <!-- Hidden input for invoice ID -->
+    <input type="hidden" id="invoiceId" name="invoiceId">
 
     <button type="submit" class="btn btn-success">Submit Invoice</button>
     <a href="invoice.html" class="btn btn-secondary">Cancel</a>
@@ -71,8 +68,6 @@
 </div>
 
 <script>
-
-
   const selectedItems = new Map();  // This will hold all selected items
 
   function addItemToInvoice(id, name, price) {
@@ -84,7 +79,7 @@
       selectedItems.set(id, { id, name, price, quantity: 1, total: price });
     }
     updateSelectedItemsTable();
-    storeTemporaryData();  // Store temporarily in localStorage// Update the table UI
+    storeTemporaryData();  // Store temporarily in localStorage
   }
 
   function removeItemFromInvoice(id) {
@@ -100,15 +95,15 @@
 
     selectedItems.forEach(item => {
       tableBody.append(`
-                <tr>
-                    <td>${item.id}</td>
-                    <td>${item.name}</td>
-                    <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${item.id}, this.value)"></td>
-                    <td>${item.price.toFixed(2)}</td>
-                    <td>${item.total.toFixed(2)}</td>
-                    <td><button class="btn btn-danger btn-sm" onclick="removeItemFromInvoice(${item.id})">Remove</button></td>
-                </tr>
-            `);
+        <tr>
+          <td>${item.id}</td>
+          <td>${item.name}</td>
+          <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${item.id}, this.value)"></td>
+          <td>${item.price.toFixed(2)}</td>
+          <td>${item.total.toFixed(2)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="removeItemFromInvoice(${item.id})">Remove</button></td>
+        </tr>
+      `);
       totalAmount += item.total;
     });
 
@@ -144,17 +139,17 @@
         tableBody.empty();  // Clear existing rows
         items.forEach(item => {
           tableBody.append(`
-                        <tr id="item-${item.id}">
-                            <td>${item.id}</td>
-                            <td>${item.name}</td>
-                            <td>${item.description}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.price}</td>
-                            <td>
-                                <div class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</div>
-                            </td>
-                        </tr>
-                    `);
+            <tr id="item-${item.id}">
+              <td>${item.id}</td>
+              <td>${item.name}</td>
+              <td>${item.description}</td>
+              <td>${item.quantity}</td>
+              <td>${item.price}</td>
+              <td>
+                <div class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</div>
+              </td>
+            </tr>
+          `);
         });
       },
       error: function() {
@@ -166,12 +161,12 @@
   // Store temporary data in localStorage after each modification
   function storeTemporaryData() {
     const formData = {
-      date: $('#date').val(),
       total: $('#total').val(),
       selectedItems: $('#selectedItems').val()
     };
     localStorage.setItem('invoiceTempData', JSON.stringify(formData));  // Store temporary data
   }
+
   function loadInvoiceData(invoiceId) {
     $.ajax({
       url: '../invoices?action=getItems',  // Adjust this URL according to your backend logic
@@ -181,8 +176,8 @@
       success: function(response) {
         const invoice = response.invoice;
         if (invoice) {
-          $('#date').val(new Date(invoice.date).toISOString().split('T')[0]);
           $('#total').val(invoice.total.toFixed(2));
+          $('#invoiceId').val(invoiceId);  // Set the invoice ID in hidden input
 
           if (response.invoiceItems) {
             response.invoiceItems.forEach(item => {
