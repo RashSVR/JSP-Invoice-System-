@@ -9,6 +9,24 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Invoicing System</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/invoice.html">Manage Invoices</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="pages/items.html">Manage Items</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
 <div class="container mt-5">
     <h1 class="text-center mb-4">Add Invoice</h1>
     <form id="addInvoiceForm">
@@ -70,6 +88,10 @@
         <a href="invoice.html" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+
+<footer class="footer text-black text-center py-3 mt-auto">
+    <p>&copy; 2024 Invoicing System. All rights reserved.</p>
+</footer>
 
 <script>
     function setCurrentDate() {
