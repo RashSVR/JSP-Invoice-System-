@@ -165,7 +165,7 @@
 
   function loadInvoiceData(invoiceId) {
     $.ajax({
-      url: '../invoices?action=getInvoice',  // Adjust this URL according to your backend logic
+      url: '../invoices?action=getItems',  // Adjust this URL according to your backend logic
       type: 'POST',
       dataType: 'json',
       data: { id: invoiceId },
@@ -223,7 +223,7 @@
 
   $(document).ready(function() {
     fetchItems();  // Fetch available items on page load
-    const invoiceId = new URLSearchParams(window.location.search).get('invoiceId');
+    const invoiceId = new URLSearchParams(window.location.search).get('id');
     if (invoiceId) {
       loadInvoiceData(invoiceId);  // Load invoice data if invoiceId is present
     }
