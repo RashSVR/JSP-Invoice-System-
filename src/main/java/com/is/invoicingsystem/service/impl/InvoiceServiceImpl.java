@@ -155,6 +155,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoiceItem.setQuantity(v);
             invoiceItemDao.saveInvoiceItame(invoiceItem);
         });
+        String invoiceJson = gson.toJson(invoice);
+        response.setStatus(HttpServletResponse.SC_CREATED);
+        response.getWriter().write(invoiceJson);
     }
 
     public void deleteInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -22,8 +22,9 @@ public class InvoiceItemDao {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
             session.createQuery
-                            ("DELETE FROM InvoiceItem ii WHERE ii.invoice = :invoice", InvoiceItem.class)
-                    .setParameter("invoice", invoice).executeUpdate();
+                            ("DELETE FROM InvoiceItem ii WHERE ii.invoice = :invoice")
+                    .setParameter("invoice", invoice)
+                    .executeUpdate();
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
