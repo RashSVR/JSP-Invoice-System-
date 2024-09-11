@@ -116,6 +116,7 @@
                                 </td>
                                 <td>
                                     <a href="edit_invoice.html?id=${invoice.id}" class="btn btn-primary btn-sm">Edit</a>
+
                                     <button class="btn btn-danger btn-sm" onclick="confirmDelete(${invoice.id})">Delete</button>
                                 </td>
                             </tr>
@@ -154,22 +155,26 @@
             });
         });
 
-        function viewItems(invoiceId) {
+        window.viewItems = function(invoiceId) {
             $.ajax({
-                url: `InvoiceServlet?action=viewItems&id=${invoiceId}`, // Send ID as a query parameter
+                url: '../invoices?action=getItems', // Updated URL
                 type: 'POST',
                 dataType: 'json',
+                data: $.param({ id: invoiceId }),  // Send ID as URL-encoded form data
                 success: function(data) {
                     console.log(data);  // Debugging: check the returned data
                     let itemsTableBody = $('#itemsTableBody');
                     itemsTableBody.empty(); // Clear previous items
 
-                    data.forEach(item => {
+                    data.invoiceItems.forEach(invoiceItem => {
+                        const item = invoiceItem.item; // Access the item object
+                        const quantity = invoiceItem.quantity; // Access the quantity specific to this invoice item
+
                         itemsTableBody.append(`
                             <tr>
-                                <td>${item.itemId}</td>
+                                <td>${item.id}</td>
                                 <td>${item.name}</td>
-                                <td>${item.quantity}</td>
+                                <td>${quantity}</td>
                                 <td>${item.price}</td>
                             </tr>
                         `);
