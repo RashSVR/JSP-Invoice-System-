@@ -36,7 +36,7 @@
           <th>Action</th>
         </tr>
         </thead>
-        <tbody id="itemTableBody">
+        <tbody id="availableItemsTableBody">
         <!-- Items will be dynamically inserted here -->
         </tbody>
       </table>
@@ -65,7 +65,6 @@
     <!-- Hidden input for selected items -->
     <input type="hidden" id="selectedItems" name="selectedItems">
 
-    <button type="button" class="btn btn-primary" id="saveDraftButton">Save Draft</button>
     <button type="submit" class="btn btn-success">Submit Invoice</button>
     <a href="invoice.html" class="btn btn-secondary">Cancel</a>
   </form>
@@ -77,7 +76,7 @@
     document.getElementById('date').value = today;
   }
 
-  const selectedItems = new Map();
+  const selectedItems = new Map();  // This will hold all selected items
 
   function addItemToInvoice(id, name, price) {
     if (selectedItems.has(id)) {
@@ -87,7 +86,7 @@
     } else {
       selectedItems.set(id, { id, name, price, quantity: 1, total: price });
     }
-    updateSelectedItemsTable();
+    updateSelectedItemsTable();  // Update the table UI
   }
 
   function removeItemFromInvoice(id) {
@@ -102,60 +101,60 @@
 
     selectedItems.forEach(item => {
       tableBody.append(`
-        <tr>
-          <td>${item.id}</td>
-          <td>${item.name}</td>
-          <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${item.id}, this.value)"></td>
-          <td>${item.price.toFixed(2)}</td>
-          <td>${item.total.toFixed(2)}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="removeItemFromInvoice(${item.id})">Remove</button></td>
-        </tr>
-      `);
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" min="1" onchange="updateQuantity(${item.id}, this.value)"></td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${item.total.toFixed(2)}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeItemFromInvoice(${item.id})">Remove</button></td>
+                </tr>
+            `);
       totalAmount += item.total;
     });
 
-    $('#total').val(totalAmount.toFixed(2));
-    updateHiddenSelectedItemsField();
+    $('#total').val(totalAmount.toFixed(2));  // Update total price
+    updateHiddenSelectedItemsField();  // Update hidden input for form
   }
 
   function updateQuantity(id, quantity) {
-    if (quantity < 1) quantity = 1;
+    if (quantity < 1) quantity = 1;  // Ensure quantity is at least 1
     if (selectedItems.has(id)) {
       const item = selectedItems.get(id);
       item.quantity = parseInt(quantity, 10);
       item.total = item.quantity * item.price;
-      updateSelectedItemsTable();
+      updateSelectedItemsTable();  // Update table UI
     }
   }
 
   function updateHiddenSelectedItemsField() {
     const selectedItemsArray = Array.from(selectedItems.values()).map(item => {
-      return `${item.id}:${item.quantity}`;
+      return { id: item.id, quantity: item.quantity };
     });
     $('#selectedItems').val(JSON.stringify(selectedItemsArray));
   }
 
   function fetchItems() {
     $.ajax({
-      url: '../items', // Adjust this URL according to your backend logic
+      url: '../items',  // Adjust this URL according to your backend logic
       type: 'POST',
       success: function(response) {
         const items = response;
-        let tableBody = $('#itemTableBody');
-        tableBody.empty(); // Clear existing rows
+        let tableBody = $('#availableItemsTableBody');
+        tableBody.empty();  // Clear existing rows
         items.forEach(item => {
           tableBody.append(`
-            <tr id="item-${item.id}">
-              <td>${item.id}</td>
-              <td>${item.name}</td>
-              <td>${item.description}</td>
-              <td>${item.quantity}</td>
-              <td>${item.price}</td>
-              <td>
-                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
-              </td>
-            </tr>
-          `);
+                        <tr id="item-${item.id}">
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.description}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price}</td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
+                            </td>
+                        </tr>
+                    `);
         });
       },
       error: function() {
@@ -166,26 +165,29 @@
 
   function loadInvoiceData(invoiceId) {
     $.ajax({
-      url: '../invoices?action=getItems', // Updated URL
+      url: '../invoices?action=getInvoice',  // Adjust this URL according to your backend logic
       type: 'POST',
       dataType: 'json',
-      data: $.param({ id: invoiceId }),
+      data: { id: invoiceId },
       success: function(response) {
         const invoice = response.invoice;
-        $('#date').val(new Date(invoice.date).toISOString().split('T')[0]);
-        $('#total').val(invoice.total.toFixed(2));
+        if (invoice) {
+          $('#date').val(new Date(invoice.date).toISOString().split('T')[0]);
+          $('#total').val(invoice.total.toFixed(2));
 
-        // Populate selected items
-        response.invoiceItems.forEach(item => {
-          selectedItems.set(item.item.id, {
-            id: item.item.id,
-            name: item.item.name,
-            price: item.item.price,
-            quantity: item.quantity,
-            total: item.quantity * item.item.price
-          });
-        });
-        updateSelectedItemsTable();
+          if (response.invoiceItems) {
+            response.invoiceItems.forEach(item => {
+              selectedItems.set(item.item.id, {
+                id: item.item.id,
+                name: item.item.name,
+                price: item.item.price,
+                quantity: item.quantity,
+                total: item.quantity * item.item.price
+              });
+            });
+            updateSelectedItemsTable();
+          }
+        }
       },
       error: function() {
         alert('Failed to load invoice data');
@@ -193,63 +195,40 @@
     });
   }
 
-  function saveDraft() {
-    const formData = {
-      date: $('#date').val(),
-      total: $('#total').val(),
-      selectedItems: $('#selectedItems').val()
-    };
-    localStorage.setItem('invoiceDraft', JSON.stringify(formData));
-    alert('Draft saved successfully!');
-  }
-
   function submitInvoice() {
-    // Update hidden field with selected items before serializing
-    updateHiddenSelectedItemsField();
+    updateHiddenSelectedItemsField();  // Ensure hidden field is updated
 
     $.ajax({
       type: 'POST',
-      url: 'InvoiceServlet?action=update', // Adjust this URL according to your backend logic
+      url: '../invoices?action=update',  // Adjust this URL according to your backend logic
       data: $('#editInvoiceForm').serialize(),
       success: function(response) {
-        if (response.success) { // Assuming the server returns a JSON object with a success flag
-          window.location.href = 'invoices.jsp';
+        if (response.success) {  // Assuming the server returns a success flag
+          window.location.href = 'invoices.html';  // Redirect to invoices page
         } else {
           alert('Failed to save invoice: ' + response.message);
         }
       },
       error: function(xhr, status, error) {
-        console.error('Error:', error); // Log the error to the console for debugging
+        console.error('Error:', error);  // Log error for debugging
         alert('Failed to save invoice.');
       }
     });
   }
 
-  // Handle Save Draft button click
-  $('#saveDraftButton').on('click', function(e) {
-    e.preventDefault();
-    saveDraft();
-  });
-
-  // Handle Edit Invoice form submission
   $('#editInvoiceForm').on('submit', function(e) {
     e.preventDefault();
-    submitInvoice();
+    submitInvoice();  // Submit the invoice when form is submitted
   });
 
-  // Fetch items and load invoice data when the page loads
   $(document).ready(function() {
-    fetchItems();
-    const invoiceId = getQueryStringParameter('invoiceId'); // Assume you get invoiceId from query string
+    fetchItems();  // Fetch available items on page load
+    const invoiceId = new URLSearchParams(window.location.search).get('invoiceId');
     if (invoiceId) {
-      loadInvoiceData(invoiceId);
+      loadInvoiceData(invoiceId);  // Load invoice data if invoiceId is present
     }
+    setCurrentDate();  // Set current date on page load
   });
-
-  function getQueryStringParameter(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-  }
 </script>
 </body>
 </html>
