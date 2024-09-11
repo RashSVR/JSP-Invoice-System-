@@ -151,7 +151,7 @@
                             <td>${item.quantity}</td>
                             <td>${item.price}</td>
                             <td>
-                                <button class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</button>
+                                <div class="btn btn-success btn-sm" onclick="addItemToInvoice(${item.id}, '${item.name}', ${item.price})">Add</div>
                             </td>
                         </tr>
                     `);
@@ -210,8 +210,8 @@
 
     $.ajax({
       type: 'POST',
-      url: '../invoices?action=update',  // Adjust this URL according to your backend logic
-      data: $('#addInvoiceForm').serialize(),  // Send serialized form data
+      url: '../invoices?action=edit',  // Adjust this URL according to your backend logic
+      data: $('#editInvoiceForm').serialize(),  // Send serialized form data
       success: function(response) {
         if (response) {  // Assuming the server returns a success flag
           localStorage.removeItem('invoiceTempData');  // Clear temporary data on success

@@ -136,14 +136,25 @@ public class InvoiceServiceImpl implements InvoiceService {
         Long id = Long.parseLong(request.getParameter("id"));
         double total = Double.parseDouble(request.getParameter("total"));
 
-
-        Invoice invoice = new Invoice();
-        invoice.setId(id);
-        invoice.setDate(new Date()); // Set LocalDate
+        Invoice invoice = invoiceDao.getInvoiceById(id);
         invoice.setTotal(BigDecimal.valueOf(total));
-
         invoiceDao.saveInvoice(invoice);
-        response.sendRedirect("invoices");
+        invoiceItemDao.deleteByInvoiceId(invoice);
+
+        List<Map<String, Long>> selectedItems = objectMapper.readValue(
+                request.getParameter("selectedItems"),
+                new TypeReference<List<Map<String, Long>>>() {});
+        Map<Long, Long> resultMap = selectedItems.stream()
+                .collect(Collectors.toMap(obj -> obj.get("id"), obj -> obj.get("quantity")));
+
+        resultMap.forEach((k,v)->{
+            Item item = itemDao.getItemById(k);
+            InvoiceItem invoiceItem = new InvoiceItem();
+            invoiceItem.setInvoice(invoice);
+            invoiceItem.setItem(item);
+            invoiceItem.setQuantity(v);
+            invoiceItemDao.saveInvoiceItame(invoiceItem);
+        });
     }
 
     public void deleteInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {

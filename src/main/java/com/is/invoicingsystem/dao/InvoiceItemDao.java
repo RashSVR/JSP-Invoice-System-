@@ -12,8 +12,24 @@ public class InvoiceItemDao {
     public List<InvoiceItem> getInvoiceById(Invoice invoice) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery
-                    ("FROM InvoiceItem ii WHERE ii.invoice = :invoice", InvoiceItem.class)
+                            ("FROM InvoiceItem ii WHERE ii.invoice = :invoice", InvoiceItem.class)
                     .setParameter("invoice", invoice).list();
+        }
+    }
+
+    public void deleteByInvoiceId(Invoice invoice) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            transaction = session.beginTransaction();
+            session.createQuery
+                            ("DELETE FROM InvoiceItem ii WHERE ii.invoice = :invoice", InvoiceItem.class)
+                    .setParameter("invoice", invoice).executeUpdate();
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (transaction != null) {
+                transaction.rollback();  // Rollback the transaction in case of failure
+            }
         }
     }
 
