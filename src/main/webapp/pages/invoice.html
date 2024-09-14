@@ -117,33 +117,6 @@
 </footer>
 
 <script>
-    function printInvoice(invoiceId) {
-        console.log('Print Invoice triggered for Invoice ID:', invoiceId); // Debugging
-        $.ajax({
-            url: '../invoices?id=${invoiceId}&action=print',  // Adjust URL according to your backend routing
-            type: 'POST',
-            success: function(response) {
-                if (response.invoice) {
-                    const pdfData = atob(response.invoice); // Decode the Base64 encoded PDF
-                    const byteArray = new Uint8Array(pdfData.length);
-                    for (let i = 0; i < pdfData.length; i++) {
-                        byteArray[i] = pdfData.charCodeAt(i);
-                    }
-
-                    const blob = new Blob([byteArray], { type: "application/pdf" });
-                    const link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = `invoice_${invoiceId}.pdf`;
-                    link.click();
-                } else {
-                    alert("Failed to generate invoice PDF.");
-                }
-            },
-            error: function() {
-                alert("Error occurred while fetching the invoice.");
-            }
-        });
-    }
 
     $(document).ready(function() {
         fetchInvoices();
@@ -168,7 +141,7 @@
                                 <td>
                                     <a href="edit_invoice.html?id=${invoice.id}" class="btn btn-primary btn-sm">Edit</a>
                                     <button class="btn btn-danger btn-sm" onclick="confirmDelete(${invoice.id})">Delete</button>
-                                    <button class="btn btn-secondary btn-sm" onclick="printInvoice(${invoice.id})">Print</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="printInvo(${invoice.id})">Print</button>
                                 </td>
                             </tr>
                         `);
@@ -181,6 +154,35 @@
                 }
             });
         }
+
+        function printInvo(invoiceId) {
+            console.log('Print Invoice triggered for Invoice ID:', invoiceId); // Debugging
+            $.ajax({
+                url: `../invoices?id=${invoiceId}&action=print`,  // Adjust URL according to your backend routing
+                type: 'POST',
+                success: function(response) {
+                    if (response.invoice) {
+                        const pdfData = atob(response.invoice); // Decode the Base64 encoded PDF
+                        const byteArray = new Uint8Array(pdfData.length);
+                        for (let i = 0; i < pdfData.length; i++) {
+                            byteArray[i] = pdfData.charCodeAt(i);
+                        }
+
+                        const blob = new Blob([byteArray], { type: "application/pdf" });
+                        const link = document.createElement("a");
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `invoice_${invoiceId}.pdf`;
+                        link.click();
+                    } else {
+                        alert("Failed to generate invoice PDF.");
+                    }
+                },
+                error: function() {
+                    alert("Error occurred while fetching the invoice.");
+                }
+            });
+        }
+
 
         let deleteInvoiceId;
 
