@@ -209,19 +209,19 @@ public class InvoiceServiceImpl implements InvoiceService {
                     printInvoiceResponse.setInvoice(Base64.getEncoder().encodeToString(outputStream.toByteArray()));
 
 
-//                    // Set response headers to trigger PDF download
-//                    response.setContentType("application/pdf");
-//                    response.setHeader("Content-Disposition", "attachment; filename=invoice_" + invoice.getId() + ".pdf");
-//                    response.setContentLength(outputStream.size());
-//
-//                    ServletOutputStream servletOutputStream = response.getOutputStream();
-//                    servletOutputStream.write(outputStream.toByteArray());
-//                    servletOutputStream.flush();
-//                    servletOutputStream.close();
+                    // Set response headers to trigger PDF download
+                    response.setContentType("application/pdf");
+                    response.setHeader("Content-Disposition", "attachment; filename=invoice_" + invoice.getId() + ".pdf");
+                    response.setContentLength(outputStream.size());
 
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().write(gson.toJson(printInvoiceResponse));
+                    ServletOutputStream servletOutputStream = response.getOutputStream();
+                    servletOutputStream.write(outputStream.toByteArray());
+//                    servletOutputStream.flush();
+                    servletOutputStream.close();
+
+//                    response.setContentType("application/json");
+//                    response.setStatus(HttpServletResponse.SC_OK);
+//                    response.getWriter().write(gson.toJson(printInvoiceResponse));
                 } else {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Item with ID " + id + " not found.");
                     return;

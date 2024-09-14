@@ -120,9 +120,8 @@
     function printInvoice(invoiceId) {
         console.log('Print Invoice triggered for Invoice ID:', invoiceId); // Debugging
         $.ajax({
-            url: '../invoices/print',  // Adjust URL according to your backend routing
+            url: '../invoices?id=${invoiceId}&action=print',  // Adjust URL according to your backend routing
             type: 'POST',
-            data: { id: invoiceId },   // Pass the invoice ID to the backend
             success: function(response) {
                 if (response.invoice) {
                     const pdfData = atob(response.invoice); // Decode the Base64 encoded PDF

@@ -244,7 +244,7 @@
             url: '../invoices?action=add',  // Adjust this URL according to your backend logic
             data: $('#addInvoiceForm').serialize(),  // Send serialized form data
             success: function(response) {
-                if (response.success) {  // Assuming the server returns a success flag
+                if (response) {  // Assuming the server returns a success flag
                     $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoice submitted successfully').show();
                     localStorage.removeItem('invoiceTempData');  // Clear temporary data on success
                     setTimeout(() => window.location.href = 'invoice.html', 2000);  // Redirect after 2 seconds
