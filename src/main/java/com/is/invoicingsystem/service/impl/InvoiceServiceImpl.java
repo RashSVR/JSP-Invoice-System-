@@ -8,19 +8,22 @@ import com.is.invoicingsystem.dao.InvoiceItemDao;
 import com.is.invoicingsystem.dao.ItemDao;
 import com.is.invoicingsystem.dto.InvoiceItemObject;
 import com.is.invoicingsystem.dto.InvoiceItemsResponse;
+import com.is.invoicingsystem.dto.PrintInvoiceObject;
+import com.is.invoicingsystem.dto.PrintInvoiceResponse;
 import com.is.invoicingsystem.model.Invoice;
 import com.is.invoicingsystem.model.InvoiceItem;
 import com.is.invoicingsystem.model.Item;
 import com.is.invoicingsystem.service.InvoiceService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class InvoiceServiceImpl implements InvoiceService {
@@ -165,4 +168,57 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceDao.deleteInvoice(id);
         response.setStatus(HttpServletResponse.SC_OK);
     }
+
+    public void printInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        String idParam = request.getParameter("id");
+        Long id = 0L;
+
+        try {
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                id = Long.parseLong(idParam);
+            }
+            if (id != 0) {
+                Invoice invoice = invoiceDao.getInvoiceById(id);
+                if (invoice != null) {
+                    List<PrintInvoiceObject> PrintInvoiceObject = new ArrayList<>();
+
+                    invoiceItemDao.getInvoiceById(invoice).forEach(e->{
+                        PrintInvoiceObject printInvoiceObject = new PrintInvoiceObject();
+                        printInvoiceObject.setItemName(e.getItem().getName());
+                        printInvoiceObject.setItemQuantity(e.getQuantity().toString());
+                        printInvoiceObject.setItemPricePerUnit(e.getItem().getPrice().toString());
+                        printInvoiceObject.setItemTotal( (String.valueOf(((e.getQuantity()) * (e.getItem().getPrice().doubleValue()))))  );
+                        PrintInvoiceObject.add(printInvoiceObject);
+                    });
+                   HashMap<String, Object> invoicePara = new HashMap<>();
+                    invoicePara.put("invoiceDate", invoice.getDate().toString() );
+                    invoicePara.put("invoiceId", invoice.getId().toString() );
+                    invoicePara.put("invoiceTotal", invoice.getTotal().toString() );
+
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    InputStream stream = InvoiceServiceImpl.class.getClassLoader().getResourceAsStream("report/invoiceReport.jrxml");
+
+                    JasperReport jasperReport = JasperCompileManager.compileReport(stream);
+                    JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, invoicePara, new JRBeanCollectionDataSource(PrintInvoiceObject));
+
+                    JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+                    outputStream.close();
+                    PrintInvoiceResponse printInvoiceResponse = new PrintInvoiceResponse();
+                    printInvoiceResponse.setInvoice(Base64.getEncoder().encodeToString(outputStream.toByteArray()));
+
+                    response.setContentType("application/json");
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().write(gson.toJson(printInvoiceResponse));
+                } else {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Item with ID " + id + " not found.");
+                    return;
+                }
+            }
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid 'id' parameter: must be a valid number.");
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing the request.");
+            e.printStackTrace();
+        }
+}
 }

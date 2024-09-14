@@ -23,4 +23,5 @@ public interface InvoiceService {
     void addInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException;
     void editInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException;
     void deleteInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException;
+    void printInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

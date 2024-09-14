@@ -48,6 +48,9 @@ public class InvoiceController extends HttpServlet {
                 case "getItems":
                     invoiceService.getItems(request, response);
                     break;
+                case "print":
+                    invoiceService.printInvoice(request, response);
+                    break;
             }
         } else {
             invoiceService.getInvoices(request, response);
