@@ -117,20 +117,43 @@
 </footer>
 
 <script>
+    function printInvo(invoiceId) {
+        console.log('Print Invoice triggered for Invoice ID:', invoiceId); // Debugging
+        $.ajax({
+            url: `../invoices?id=${invoiceId}&action=print`,  // Adjust URL according to your backend routing
+            type: 'POST',
+            success: function(response) {
+                if (response.invoice) {
+                    const pdfData = atob(response.invoice); // Decode the Base64 encoded PDF
+                    const byteArray = new Uint8Array(pdfData.length);
+                    for (let i = 0; i < pdfData.length; i++) {
+                        byteArray[i] = pdfData.charCodeAt(i);
+                    }
 
-    $(document).ready(function() {
-        fetchInvoices();
-
-        function fetchInvoices() {
-            $.ajax({
-                url: '../invoices', // Adjust URL according to your backend
-                type: 'POST',
-                success: function(response) {
-                    const invoices = response;
-                    let tableBody = $('#invoiceTableBody');
-                    tableBody.empty(); // Clear existing rows
-                    invoices.forEach(invoice => {
-                        tableBody.append(`
+                    const blob = new Blob([byteArray], { type: "application/pdf" });
+                    const link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = `invoice_${invoiceId}.pdf`;
+                    link.click();
+                } else {
+                    alert("Failed to generate invoice PDF.");
+                }
+            },
+            error: function() {
+                alert("Error occurred while fetching the invoice.");
+            }
+        });
+    }
+    function fetchInvoices() {
+        $.ajax({
+            url: '../invoices', // Adjust URL according to your backend
+            type: 'POST',
+            success: function(response) {
+                const invoices = response;
+                let tableBody = $('#invoiceTableBody');
+                tableBody.empty(); // Clear existing rows
+                invoices.forEach(invoice => {
+                    tableBody.append(`
                             <tr id="invoice-${invoice.id}">
                                 <td>${invoice.id}</td>
                                 <td>${invoice.date}</td>
@@ -145,43 +168,21 @@
                                 </td>
                             </tr>
                         `);
-                    });
-                    $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoices loaded successfully').show();
-                    setTimeout(() => $('#alertDiv').hide(), 3000);
-                },
-                error: function() {
-                    $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load invoices').show();
-                }
-            });
-        }
+                });
+                $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoices loaded successfully').show();
+                setTimeout(() => $('#alertDiv').hide(), 3000);
+            },
+            error: function() {
+                $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load invoices').show();
+            }
+        });
+    }
 
-        function printInvo(invoiceId) {
-            console.log('Print Invoice triggered for Invoice ID:', invoiceId); // Debugging
-            $.ajax({
-                url: `../invoices?id=${invoiceId}&action=print`,  // Adjust URL according to your backend routing
-                type: 'POST',
-                success: function(response) {
-                    if (response.invoice) {
-                        const pdfData = atob(response.invoice); // Decode the Base64 encoded PDF
-                        const byteArray = new Uint8Array(pdfData.length);
-                        for (let i = 0; i < pdfData.length; i++) {
-                            byteArray[i] = pdfData.charCodeAt(i);
-                        }
+    $(document).ready(function() {
+        fetchInvoices();
 
-                        const blob = new Blob([byteArray], { type: "application/pdf" });
-                        const link = document.createElement("a");
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = `invoice_${invoiceId}.pdf`;
-                        link.click();
-                    } else {
-                        alert("Failed to generate invoice PDF.");
-                    }
-                },
-                error: function() {
-                    alert("Error occurred while fetching the invoice.");
-                }
-            });
-        }
+
+
 
 
         let deleteInvoiceId;
