@@ -50,7 +50,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                     InvoiceItemsResponse invoicesItemsResponse = new InvoiceItemsResponse();
                     invoicesItemsResponse.setInvoice(invoice);
                     List<InvoiceItemObject> invoiceItemObjects = new ArrayList<>();
-                    invoiceItemDao.getInvoiceById(invoice).forEach(e->{
+                    invoiceItemDao.getInvoiceById(invoice).forEach(e -> {
                         InvoiceItemObject invoiceItemObject = new InvoiceItemObject();
                         invoiceItemObject.setItem(e.getItem());
                         invoiceItemObject.setQuantity(e.getQuantity());
@@ -116,7 +116,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         double total = Double.parseDouble(request.getParameter("total"));
         List<Map<String, Long>> selectedItems = objectMapper.readValue(
                 request.getParameter("selectedItems"),
-                new TypeReference<List<Map<String, Long>>>() {});
+                new TypeReference<List<Map<String, Long>>>() {
+                });
         Map<Long, Long> resultMap = selectedItems.stream()
                 .collect(Collectors.toMap(obj -> obj.get("id"), obj -> obj.get("quantity")));
         Invoice invoice = new Invoice();
@@ -124,7 +125,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setTotal(BigDecimal.valueOf(total));
         invoiceDao.saveInvoice(invoice);
         String invoiceJson = gson.toJson(invoice);
-        resultMap.forEach((k,v)->{
+        resultMap.forEach((k, v) -> {
             Item item = itemDao.getItemById(k);
             InvoiceItem invoiceItem = new InvoiceItem();
             invoiceItem.setInvoice(invoice);
@@ -147,11 +148,12 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         List<Map<String, Long>> selectedItems = objectMapper.readValue(
                 request.getParameter("selectedItems"),
-                new TypeReference<List<Map<String, Long>>>() {});
+                new TypeReference<List<Map<String, Long>>>() {
+                });
         Map<Long, Long> resultMap = selectedItems.stream()
                 .collect(Collectors.toMap(obj -> obj.get("id"), obj -> obj.get("quantity")));
 
-        resultMap.forEach((k,v)->{
+        resultMap.forEach((k, v) -> {
             Item item = itemDao.getItemById(k);
             InvoiceItem invoiceItem = new InvoiceItem();
             invoiceItem.setInvoice(invoice);
@@ -170,7 +172,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
-    public void printInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    public void printInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String idParam = request.getParameter("id");
         Long id = 0L;
 
@@ -183,18 +185,18 @@ public class InvoiceServiceImpl implements InvoiceService {
                 if (invoice != null) {
                     List<PrintInvoiceObject> PrintInvoiceObject = new ArrayList<>();
 
-                    invoiceItemDao.getInvoiceById(invoice).forEach(e->{
+                    invoiceItemDao.getInvoiceById(invoice).forEach(e -> {
                         PrintInvoiceObject printInvoiceObject = new PrintInvoiceObject();
                         printInvoiceObject.setItemName(e.getItem().getName());
                         printInvoiceObject.setItemQuantity(e.getQuantity().toString());
                         printInvoiceObject.setItemPricePerUnit(e.getItem().getPrice().toString());
-                        printInvoiceObject.setItemTotal( (String.valueOf(((e.getQuantity()) * (e.getItem().getPrice().doubleValue()))))  );
+                        printInvoiceObject.setItemTotal((String.valueOf(((e.getQuantity()) * (e.getItem().getPrice().doubleValue())))));
                         PrintInvoiceObject.add(printInvoiceObject);
                     });
-                   HashMap<String, Object> invoicePara = new HashMap<>();
-                    invoicePara.put("invoiceDate", invoice.getDate().toString() );
-                    invoicePara.put("invoiceId", invoice.getId().toString() );
-                    invoicePara.put("invoiceTotal", invoice.getTotal().toString() );
+                    HashMap<String, Object> invoicePara = new HashMap<>();
+                    invoicePara.put("invoiceDate", invoice.getDate().toString());
+                    invoicePara.put("invoiceId", invoice.getId().toString());
+                    invoicePara.put("invoiceTotal", invoice.getTotal().toString());
 
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     InputStream stream = InvoiceServiceImpl.class.getClassLoader().getResourceAsStream("report/invoiceReport.jrxml");
@@ -216,12 +218,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
                     ServletOutputStream servletOutputStream = response.getOutputStream();
                     servletOutputStream.write(outputStream.toByteArray());
-//                    servletOutputStream.flush();
                     servletOutputStream.close();
-
-//                    response.setContentType("application/json");
-//                    response.setStatus(HttpServletResponse.SC_OK);
-//                    response.getWriter().write(gson.toJson(printInvoiceResponse));
                 } else {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Item with ID " + id + " not found.");
                     return;
@@ -233,5 +230,5 @@ public class InvoiceServiceImpl implements InvoiceService {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing the request.");
             e.printStackTrace();
         }
-}
+    }
 }
