@@ -14,6 +14,7 @@ import com.is.invoicingsystem.model.Invoice;
 import com.is.invoicingsystem.model.InvoiceItem;
 import com.is.invoicingsystem.model.Item;
 import com.is.invoicingsystem.service.InvoiceService;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.*;
@@ -203,8 +204,20 @@ public class InvoiceServiceImpl implements InvoiceService {
 
                     JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
                     outputStream.close();
+
                     PrintInvoiceResponse printInvoiceResponse = new PrintInvoiceResponse();
                     printInvoiceResponse.setInvoice(Base64.getEncoder().encodeToString(outputStream.toByteArray()));
+
+
+//                    // Set response headers to trigger PDF download
+//                    response.setContentType("application/pdf");
+//                    response.setHeader("Content-Disposition", "attachment; filename=invoice_" + invoice.getId() + ".pdf");
+//                    response.setContentLength(outputStream.size());
+//
+//                    ServletOutputStream servletOutputStream = response.getOutputStream();
+//                    servletOutputStream.write(outputStream.toByteArray());
+//                    servletOutputStream.flush();
+//                    servletOutputStream.close();
 
                     response.setContentType("application/json");
                     response.setStatus(HttpServletResponse.SC_OK);
