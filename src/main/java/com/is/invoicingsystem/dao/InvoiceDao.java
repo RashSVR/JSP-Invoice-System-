@@ -1,7 +1,6 @@
 package com.is.invoicingsystem.dao;
 
 import com.is.invoicingsystem.model.Invoice;
-import com.is.invoicingsystem.model.Item;
 import com.is.invoicingsystem.utils.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;

@@ -32,13 +32,10 @@
 <div class="container-fluid mt-5">
     <h1 class="text-center mb-4">Manage Invoices</h1>
 
-    <!-- Alert Div for Messages -->
     <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
 
-    <!-- Button to Open the Add Invoice Page -->
     <a href="add_invoice.html" class="btn btn-success mb-3">Add New Invoice</a>
 
-    <!-- Invoice List Table -->
     <div class="card">
         <div class="card-header">
             <h4>Invoices</h4>
@@ -56,7 +53,6 @@
                     </tr>
                     </thead>
                     <tbody id="invoiceTableBody">
-                    <!-- Data will be populated by JavaScript -->
                     </tbody>
                 </table>
             </div>
@@ -64,7 +60,6 @@
     </div>
 </div>
 
-<!-- Items Modal -->
 <div class="modal fade" id="itemsModal" tabindex="-1" aria-labelledby="itemsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -84,7 +79,6 @@
                         </tr>
                         </thead>
                         <tbody id="itemsTableBody">
-                        <!-- Items will be dynamically loaded here -->
                         </tbody>
                     </table>
                 </div>
@@ -93,7 +87,6 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -118,13 +111,13 @@
 
 <script>
     function printInvo(invoiceId) {
-        console.log('Print Invoice triggered for Invoice ID:', invoiceId); // Debugging
+        console.log('Print Invoice triggered for Invoice ID:', invoiceId);
         $.ajax({
-            url: `../invoices?id=${invoiceId}&action=print`,  // Adjust URL according to your backend routing
+            url: `../invoices?id=${invoiceId}&action=print`,
             type: 'POST',
             success: function(response) {
                 if (response.invoice) {
-                    const pdfData = atob(response.invoice); // Decode the Base64 encoded PDF
+                    const pdfData = atob(response.invoice);
                     const byteArray = new Uint8Array(pdfData.length);
                     for (let i = 0; i < pdfData.length; i++) {
                         byteArray[i] = pdfData.charCodeAt(i);
@@ -146,7 +139,7 @@
     }
     function fetchInvoices() {
         $.ajax({
-            url: '../invoices', // Adjust URL according to your backend
+            url: '../invoices',
             type: 'POST',
             success: function(response) {
                 const invoices = response;
@@ -194,7 +187,7 @@
 
         $('#confirmDeleteBtn').click(function() {
             $.ajax({
-                url: `../invoices?id=${deleteInvoiceId}&action=delete`, // Send ID as a query parameter
+                url: `../invoices?id=${deleteInvoiceId}&action=delete`,
                 type: 'POST',
                 success: function() {
                     $(`#invoice-${deleteInvoiceId}`).remove();
@@ -203,7 +196,7 @@
                     $('#deleteModal').modal('hide');
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    console.error('Error deleting invoice:', textStatus, errorThrown); // Debugging line
+                    console.error('Error deleting invoice:', textStatus, errorThrown);
                     $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to delete invoice').show();
                     setTimeout(() => $('#alertDiv').hide(), 3000);
                     $('#deleteModal').modal('hide');
@@ -213,17 +206,17 @@
 
         window.viewItems = function(invoiceId) {
             $.ajax({
-                url: '../invoices?action=getItems', // Updated URL
+                url: '../invoices?action=getItems',
                 type: 'POST',
                 dataType: 'json',
-                data: $.param({ id: invoiceId }),  // Send ID as URL-encoded form data
+                data: $.param({ id: invoiceId }),
                 success: function(data) {
                     let itemsTableBody = $('#itemsTableBody');
-                    itemsTableBody.empty(); // Clear previous items
+                    itemsTableBody.empty();
 
                     data.invoiceItems.forEach(invoiceItem => {
-                        const item = invoiceItem.item; // Access the item object
-                        const quantity = invoiceItem.quantity; // Access the quantity specific to this invoice item
+                        const item = invoiceItem.item;
+                        const quantity = invoiceItem.quantity;
 
                         itemsTableBody.append(`
                             <tr>
@@ -235,7 +228,7 @@
                         `);
                     });
 
-                    $('#itemsModal').modal('show');  // Show the items modal
+                    $('#itemsModal').modal('show');
                 },
                 error: function(xhr, status, error) {
                     $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load invoice items.').show();

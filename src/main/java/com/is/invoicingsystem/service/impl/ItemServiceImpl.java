@@ -22,12 +22,10 @@ public class ItemServiceImpl implements ItemService {
         Long id = 0L;
 
         try {
-            // Validate id parameter
             if (idParam != null && !idParam.trim().isEmpty()) {
                 id = Long.parseLong(idParam);
             }
 
-            // Fetch item by id if present
             if (id != 0) {
                 Item item = itemDao.getItemById(id);
                 if (item != null) {
@@ -40,7 +38,6 @@ public class ItemServiceImpl implements ItemService {
                 items = itemDao.getAllItems();
             }
 
-            // Return the items as JSON
             String itemJson = gson.toJson(items);
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -93,7 +90,7 @@ public class ItemServiceImpl implements ItemService {
                 return;
             }
             itemDao.deleteItem(id);
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204 No Content
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid 'id' parameter: must be a valid number.");
         } catch (Exception e) {
@@ -103,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
 
     private Item getItemFromRequest(HttpServletRequest request) throws Exception {
         try {
-            String idStr = request.getParameter("id");  // Get the "id" parameter
+            String idStr = request.getParameter("id");
             Long id = (idStr != null && !idStr.isEmpty()) ? Long.parseLong(idStr) : null;
             String name = request.getParameter("name");
             String description = request.getParameter("description");

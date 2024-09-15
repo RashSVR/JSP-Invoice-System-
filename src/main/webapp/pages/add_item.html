@@ -30,7 +30,6 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Add Item</h1>
 
-    <!-- Alert Div for success or error messages -->
     <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
 
     <form id="addItemForm">
@@ -60,7 +59,6 @@
 </footer>
 
 <script>
-    // Handle form submission
     $('#addItemForm').on('submit', function(e) {
         e.preventDefault();
 
@@ -71,18 +69,12 @@
             price: $('#itemPrice').val()
         };
 
-        // AJAX call to add the item to the database
         $.ajax({
-            url: '../items', // Your backend endpoint for adding items
+            url: '../items',
             method: 'POST',
-            data: $.param(newItem) + '&action=add', // Include the action parameter
+            data: $.param(newItem) + '&action=add',
             success: function(response) {
-                // Check if the response indicates success
                 $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Item added successfully.').show();
-                // Optional: Redirect to items list after showing success message
-                // setTimeout(function() {
-                //     window.location.href = 'items.html';
-                // }, 2000);
             },
             error: function() {
                 $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to add item. Please try again.').show();

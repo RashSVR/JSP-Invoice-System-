@@ -100,8 +100,8 @@
             id: itemId,
             name: $('#itemName').val(),
             description: $('#itemDescription').val(),
-            price: parseFloat($('#itemPrice').val()).toFixed(2),  // Ensure price is formatted as a float with 2 decimal places
-            quantity: parseInt($('#itemQuantity').val(), 10)  // Ensure quantity is an integer
+            price: parseFloat($('#itemPrice').val()).toFixed(2),
+            quantity: parseInt($('#itemQuantity').val(), 10)
         };
 
         console.log('Sending Updated Item:', JSON.stringify(updatedItem));

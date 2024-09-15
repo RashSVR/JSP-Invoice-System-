@@ -31,13 +31,10 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Manage Items</h1>
 
-    <!-- Alert Div for Messages -->
     <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
 
-    <!-- Button to Open Add Item Page -->
     <a href="add_item.html" class="btn btn-success mb-3">Add New Item</a>
 
-    <!-- Item List Table -->
     <div class="card">
         <div class="card-header">
             <h4>Items</h4>
@@ -56,7 +53,6 @@
                     </tr>
                     </thead>
                     <tbody id="itemTableBody">
-                    <!-- Data will be populated by JavaScript -->
                     </tbody>
                 </table>
             </div>
@@ -64,7 +60,6 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -93,7 +88,7 @@
 
         function fetchItems() {
             $.ajax({
-                url: '../items', // Adjust this URL according to your backend logic
+                url: '../items',
                 type: 'POST',
                 success: function(response) {
                     const items = response;
@@ -138,7 +133,7 @@
 
         $('#confirmDeleteBtn').click(function() {
             $.ajax({
-                url: `../items?id=${deleteItemId}&action=delete`, // Send ID as a query parameter
+                url: `../items?id=${deleteItemId}&action=delete`,
                 type: 'POST',
                 success: function() {
                     $(`#item-${deleteItemId}`).remove();
@@ -146,7 +141,7 @@
                     $('#deleteConfirmationModal').modal('hide');
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    console.error('Error deleting item:', textStatus, errorThrown); // Debugging line
+                    console.error('Error deleting item:', textStatus, errorThrown);
                     showAlert('Failed to delete item', 'danger');
                     $('#deleteConfirmationModal').modal('hide');
                 }

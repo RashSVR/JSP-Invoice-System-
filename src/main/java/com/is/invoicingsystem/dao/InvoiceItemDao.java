@@ -29,7 +29,7 @@ public class InvoiceItemDao {
         } catch (Exception e) {
             e.printStackTrace();
             if (transaction != null) {
-                transaction.rollback();  // Rollback the transaction in case of failure
+                transaction.rollback();
             }
         }
     }

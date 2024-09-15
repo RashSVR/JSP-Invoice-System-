@@ -32,7 +32,6 @@
 <div class="container mt-5">
   <h1 class="text-center mb-4">Edit Invoice</h1>
 
-  <!-- Alert Div for Success/Error Messages -->
   <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
 
   <form id="editInvoiceForm">
@@ -90,24 +89,20 @@
 </footer>
 
 <script>
-  // Other functions here ...
 
   function submitInvoice() {
-    // Before submitting, update hidden input field with selected items
     updateHiddenSelectedItemsField();
 
     $.ajax({
       type: 'POST',
-      url: '../invoices?action=edit',  // Adjust this URL according to your backend logic
-      data: $('#editInvoiceForm').serialize(),  // Send serialized form data
+      url: '../invoices?action=edit',
+      data: $('#editInvoiceForm').serialize(),
       success: function(response) {
-        if (response.success) {  // Assuming the server returns a success flag
-          localStorage.removeItem('invoiceTempData');  // Clear temporary data on success
+        if (response.success) {
+          localStorage.removeItem('invoiceTempData');
 
-          // Show success message
           $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoice saved successfully!').show();
 
-          // Optional: Redirect to the invoices page after a delay
           setTimeout(function() {
             window.location.href = 'invoices.html';
           }, 2000);
@@ -116,7 +111,7 @@
         }
       },
       error: function(xhr, status, error) {
-        console.error('Error:', error);  // Log error for debugging
+        console.error('Error:', error);
         $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to save invoice. Please try again.').show();
       }
     });
@@ -124,15 +119,15 @@
 
   $('#editInvoiceForm').on('submit', function(e) {
     e.preventDefault();
-    submitInvoice();  // Submit the invoice when form is submitted
+    submitInvoice();
   });
 
   $(document).ready(function() {
     localStorage.removeItem('invoiceTempData');
-    fetchItems();  // Fetch available items on page load
+    fetchItems();
     const invoiceId = new URLSearchParams(window.location.search).get('id');
     if (invoiceId) {
-      loadInvoiceData(invoiceId);  // Load invoice data if invoiceId is present
+      loadInvoiceData(invoiceId);
     }
     updateSelectedItemsTable();
   });

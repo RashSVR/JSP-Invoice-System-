@@ -80,12 +80,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         Long id = 0L;
 
         try {
-            // Validate id parameter
             if (idParam != null && !idParam.trim().isEmpty()) {
                 id = Long.parseLong(idParam);
             }
 
-            // Fetch item by id if present
             if (id != 0) {
                 Invoice invoice = invoiceDao.getInvoiceById(id);
                 if (invoice != null) {
@@ -98,7 +96,6 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoices = invoiceDao.getAllInvoices();
             }
 
-            // Return the items as JSON
             String itemJson = gson.toJson(invoices);
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -121,7 +118,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         Map<Long, Long> resultMap = selectedItems.stream()
                 .collect(Collectors.toMap(obj -> obj.get("id"), obj -> obj.get("quantity")));
         Invoice invoice = new Invoice();
-        invoice.setDate(new Date()); // Set LocalDate
+        invoice.setDate(new Date());
         invoice.setTotal(BigDecimal.valueOf(total));
         invoiceDao.saveInvoice(invoice);
         String invoiceJson = gson.toJson(invoice);
@@ -175,7 +172,6 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void printInvoice(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String idParam = request.getParameter("id");
         Long id = 0L;
-
         try {
             if (idParam != null && !idParam.trim().isEmpty()) {
                 id = Long.parseLong(idParam);
@@ -210,8 +206,6 @@ public class InvoiceServiceImpl implements InvoiceService {
                     PrintInvoiceResponse printInvoiceResponse = new PrintInvoiceResponse();
                     printInvoiceResponse.setInvoice(Base64.getEncoder().encodeToString(outputStream.toByteArray()));
 
-
-                    // Set response headers to trigger PDF download
                     response.setContentType("application/pdf");
                     response.setHeader("Content-Disposition", "attachment; filename=invoice_" + invoice.getId() + ".pdf");
                     response.setContentLength(outputStream.size());

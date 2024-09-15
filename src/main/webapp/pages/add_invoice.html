@@ -30,7 +30,6 @@
 <div class="container mt-5">
     <h1 class="text-center mb-4">Add Invoice</h1>
 
-    <!-- Alert Div for Messages -->
     <div id="alertDiv" class="alert" role="alert" style="display: none;"></div>
 
     <form id="addInvoiceForm">
@@ -46,10 +45,8 @@
 
 
 
-        <!-- Available Items Table -->
         <h3>Available Items</h3>
 
-        <!-- Search Field for Available Items -->
         <div class="form-group">
             <label for="searchItems">Search Items</label>
             <input type="text" class="form-control" id="searchItems" placeholder="Search for items...">
@@ -68,12 +65,10 @@
                 </tr>
                 </thead>
                 <tbody id="availableItemsTableBody">
-                <!-- Items will be dynamically inserted here -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Selected Items Table -->
         <h3>Selected Items</h3>
         <div class="table-responsive">
             <table class="table table-bordered" id="selectedItemsTable">
@@ -88,15 +83,12 @@
                 </tr>
                 </thead>
                 <tbody id="selectedItemsTableBody">
-                <!-- Items added to the invoice will appear here -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Hidden input for selected items -->
         <input type="hidden" id="selectedItems" name="selectedItems">
 
-        <!-- Submit Button -->
         <button type="submit" class="btn btn-success">Submit Invoice</button>
         <a href="invoice.html" class="btn btn-secondary">Cancel</a>
     </form>
@@ -112,9 +104,7 @@
         document.getElementById('date').value = today;
     }
 
-    const selectedItems = new Map();  // This will hold all selected items
-
-    // Add item to invoice without making a server request
+    const selectedItems = new Map();
     function addItemToInvoice(id, name, price) {
         if (selectedItems.has(id)) {
             const item = selectedItems.get(id);
@@ -123,18 +113,16 @@
         } else {
             selectedItems.set(id, { id, name, price, quantity: 1, total: price });
         }
-        updateSelectedItemsTable();  // Update the table UI
-        storeTemporaryData();  // Store temporarily in localStorage
+        updateSelectedItemsTable();
+        storeTemporaryData();
     }
 
-    // Remove an item from the invoice
     function removeItemFromInvoice(id) {
         selectedItems.delete(id);
         updateSelectedItemsTable();
-        storeTemporaryData();  // Store temporarily in localStorage
+        storeTemporaryData();
     }
 
-    // Update the table displaying the selected items
     function updateSelectedItemsTable() {
         const tableBody = $('#selectedItemsTableBody');
         tableBody.empty();
@@ -154,23 +142,21 @@
             totalAmount += item.total;
         });
 
-        $('#total').val(totalAmount.toFixed(2));  // Update total price
-        updateHiddenSelectedItemsField();  // Update hidden input for form
+        $('#total').val(totalAmount.toFixed(2));
+        updateHiddenSelectedItemsField();
     }
 
-    // Handle quantity changes
     function updateQuantity(id, quantity) {
-        if (quantity < 1) quantity = 1;  // Ensure quantity is at least 1
+        if (quantity < 1) quantity = 1;
         if (selectedItems.has(id)) {
             const item = selectedItems.get(id);
             item.quantity = parseInt(quantity, 10);
             item.total = item.quantity * item.price;
-            updateSelectedItemsTable();  // Update table UI
+            updateSelectedItemsTable();
         }
-        storeTemporaryData();  // Store temporarily in localStorage
+        storeTemporaryData();
     }
 
-    // Update hidden form field to hold the selected items
     function updateHiddenSelectedItemsField() {
         const selectedItemsArray = Array.from(selectedItems.values()).map(item => {
             return { id: item.id, quantity: item.quantity };
@@ -178,15 +164,14 @@
         $('#selectedItems').val(JSON.stringify(selectedItemsArray));
     }
 
-    // Fetch items from the server (no interaction until "Submit")
     function fetchItems() {
         $.ajax({
-            url: '../items',  // Adjust this URL according to your backend logic
+            url: '../items',
             type: 'POST',
             success: function(response) {
                 const items = response;
                 let tableBody = $('#availableItemsTableBody');
-                tableBody.empty();  // Clear existing rows
+                tableBody.empty();
                 items.forEach(item => {
                     tableBody.append(`
                         <tr id="item-${item.id}">
@@ -201,7 +186,7 @@
                         </tr>
                     `);
                 });
-                filterTable();  // Call filterTable to apply any existing search filter
+                filterTable();
             },
             error: function() {
                 $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to load items').show();
@@ -209,13 +194,12 @@
         });
     }
 
-    // Filter the available items table based on the search input
     function filterTable() {
         const searchQuery = $('#searchItems').val().toLowerCase();
         $('#availableItemsTableBody tr').each(function() {
             const row = $(this);
-            const name = row.find('td').eq(1).text().toLowerCase();  // Name column
-            const description = row.find('td').eq(2).text().toLowerCase();  // Description column
+            const name = row.find('td').eq(1).text().toLowerCase();
+            const description = row.find('td').eq(2).text().toLowerCase();
             if (name.includes(searchQuery) || description.includes(searchQuery)) {
                 row.show();
             } else {
@@ -224,55 +208,49 @@
         });
     }
 
-    // Store temporary data in localStorage after each modification
     function storeTemporaryData() {
         const formData = {
             date: $('#date').val(),
             total: $('#total').val(),
             selectedItems: $('#selectedItems').val()
         };
-        localStorage.setItem('invoiceTempData', JSON.stringify(formData));  // Store temporary data
+        localStorage.setItem('invoiceTempData', JSON.stringify(formData));
     }
 
-    // Submit the final invoice and send data to the server
     function submitInvoice() {
-        // Before submitting, update hidden input field with selected items
         updateHiddenSelectedItemsField();
 
         $.ajax({
             type: 'POST',
-            url: '../invoices?action=add',  // Adjust this URL according to your backend logic
-            data: $('#addInvoiceForm').serialize(),  // Send serialized form data
+            url: '../invoices?action=add',
+            data: $('#addInvoiceForm').serialize(),
             success: function(response) {
-                if (response) {  // Assuming the server returns a success flag
+                if (response) {
                     $('#alertDiv').removeClass('alert-danger').addClass('alert-success').text('Invoice submitted successfully').show();
-                    localStorage.removeItem('invoiceTempData');  // Clear temporary data on success
-                    setTimeout(() => window.location.href = 'invoice.html', 2000);  // Redirect after 2 seconds
+                    localStorage.removeItem('invoiceTempData');
+                    setTimeout(() => window.location.href = 'invoice.html', 2000);
                 } else {
                     $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to save invoice: ' + response.message).show();
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error:', error);  // Log error for debugging
+                console.error('Error:', error);
                 $('#alertDiv').removeClass('alert-success').addClass('alert-danger').text('Failed to save invoice.').show();
             }
         });
     }
 
-    // Handle form submission for the invoice
     $('#addInvoiceForm').on('submit', function(e) {
         e.preventDefault();
-        submitInvoice();  // Submit the invoice when "Save" is clicked
+        submitInvoice();
     });
 
-    // Attach the filterTable function to the search input's keyup event
     $('#searchItems').on('keyup', filterTable);
 
-    // Fetch items and initialize page when ready
     $(document).ready(function() {
         localStorage.removeItem('invoiceTempData');
         fetchItems();
-        setCurrentDate();  // Set current date on page load
+        setCurrentDate();
         updateSelectedItemsTable();
     });
 </script>
